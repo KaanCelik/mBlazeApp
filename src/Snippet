@@ -1,0 +1,98 @@
+Xuint32 playLED(){
+	volatile int* regLED = (int*) XPAR_DIGILENT_SEVSEG_DISP_BASEADDR;
+	xil_printf("%c[2J", 27);
+
+	status = initAxiTimer();
+
+	xil_printf("Timer Status : %X\r\n", status);
+
+
+	status = XGpio_Initialize(&GpioOutput, XPAR_LEDS_8BITS_DEVICE_ID);
+	if (status != XST_SUCCESS)
+		return XST_FAILURE;
+	XGpio_SetDataDirection(&GpioOutput, 1, 0x0);
+
+	status = XGpio_Initialize(&GpioInput, XPAR_DIP_SWITCHES_8BITS_DEVICE_ID);
+	if (status != XST_SUCCESS)
+		return XST_FAILURE;
+	XGpio_SetDataDirection(&GpioInput, 1, 0xFFFFFFFF);
+
+	OldData = 0xFFFFFFFF;
+	xil_printf("8BITS DEVICE Status : 0x%X\r\n", status);
+
+	bool action = true;
+	while (1) {
+
+		// Read the state of the DIP switches
+		DataRead = XGpio_DiscreteRead(&GpioInput, 1);
+		// Send the data to the UART if the settings change
+
+		if (DataRead != OldData) {
+
+			double elapsedTime;
+			if (action == true) {
+				startTimer();
+				action = false;
+			} else {
+				stopTimer();
+				elapsedTime = getElapsedSeconds();
+				action = true;
+				int eTime = (int)(elapsedTime*100000);
+				xil_printf("Elapsed Time: %d\r\n", eTime);
+				//xil_printf("Elapsed Time: %d\r\n", eTime);
+			}
+			// Set the GPIO outputs to the DIP switch values
+			XGpio_DiscreteWrite(&GpioOutput, 1, DataRead);
+			int temp = OldData;
+			*regLED = DataRead + (temp << 8);
+
+			xil_printf("Old: 0x%X\r\n", OldData);
+			xil_printf("New: 0x%X\r\n", DataRead);
+			// Record the DIP switch settings
+			OldData = DataRead;
+		}
+	}
+}
+
+unsigned int enableTimer(){
+
+	XTmrCtr_Enable(axiTimerBaseAddress, 0);
+	return XTmrCtr_ReadReg(axiTimerBaseAddress,0,XTC_TCSR_OFFSET) & XTC_CSR_ENABLE_TMR_MASK;
+}
+unsigned int enableTimerInterrupt(){
+
+	XTmrCtr_EnableIntr(axiTimerBaseAddress, 0);
+	return XTmrCtr_ReadReg(axiTimerBaseAddress,0,XTC_TCSR_OFFSET) & XTC_CSR_ENABLE_INT_MASK;
+}
+unsigned int enableTimerAutoReload(){
+
+	XTmrCtr_WriteReg((axiTimerBaseAddress), (0), XTC_TCSR_OFFSET,   \
+				(XTmrCtr_ReadReg((axiTimerBaseAddress), (0),  \
+				XTC_TCSR_OFFSET) | XTC_CSR_AUTO_RELOAD_MASK));
+
+	return XTmrCtr_ReadReg(axiTimerBaseAddress,0,XTC_TCSR_OFFSET) & XTC_CSR_AUTO_RELOAD_MASK;
+}
+
+
+while loop : 
+
+	while (1)
+		{
+
+			DataRead = XGpio_DiscreteRead(&GpioInput, 1);
+
+			if (DataRead != OldData) {
+						u32 tmrSettings = XTmrCtr_ReadReg(axiTimerBaseAddress,0,XTC_TCSR_OFFSET);
+						xil_printf("Int Occured : 0x%X\r\n", tmrSettings&XTC_CSR_INT_OCCURED_MASK);
+						unsigned int time = XTmrCtr_GetValue(&axiTimerCtr,0);
+						xil_printf("Time : 0x%X\r\n", time);
+						// Set the GPIO outputs to the DIP switch values
+						XGpio_DiscreteWrite(&GpioOutput, 1, DataRead);
+						int temp = OldData;
+						*regLED = DataRead + (temp << 8);
+						xil_printf("Old: 0x%X ", OldData);
+						xil_printf("New: 0x%X\r\n", DataRead);
+						// Record the DIP switch settings
+						OldData = DataRead;
+			}
+		}
