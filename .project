@@ -3,6 +3,7 @@
 	<name>FirstProject</name>
 	<comment></comment>
 	<projects>
+		<project>mBlaze_v1.2.1_bsp</project>
 		<project>mBlaze_v1.2.1</project>
 		<project>mBlaze_v1.1_bsp</project>
 		<project>mBlaze_bsp_v1</project>

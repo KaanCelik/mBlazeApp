@@ -40,7 +40,7 @@ all: FirstProject.elf secondary-outputs
 FirstProject.elf: $(OBJS) ../src/lscript.ld $(USER_OBJS)
 	@echo Building target: $@
 	@echo Invoking: MicroBlaze gcc linker
-	mb-gcc -Wl,--no-relax -Wl,-T -Wl,../src/lscript.ld -L../../mBlaze_v1.2.1/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mcpu=v8.40.a -mno-xl-soft-mul -o"FirstProject.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	mb-gcc -Wl,--no-relax -Wl,-T -Wl,../src/lscript.ld -L../../mBlaze_v1.2.1_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mcpu=v8.40.a -mno-xl-soft-mul -o"FirstProject.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo Finished building target: $@
 	@echo ' '
 

@@ -48,7 +48,7 @@ volatile u8 handleType;
 Xuint32 initLed();
 Xuint32 initSwitch();
 
-int SetUpInterruptSystem(XIntc *XIntcInstancePtr);
+int SetUpInterruptSystem();
 void printIntcProperties();
 void printUartLiteProperties();
 u32 sendString(unsigned char* data);
@@ -95,51 +95,47 @@ int main()
 	Status = XUartLite_SelfTest(&uartCtr);
 	xil_printf("Uart Status : 0x%X\r\n", Status);
 	if (Status != XST_SUCCESS) {return XST_FAILURE;}
-
+	/***************************************************************/
+	//Interrupt Controller.
+	/***************************************************************/
+	Status = SetUpInterruptSystem();
+	if (Status != XST_SUCCESS) {return XST_FAILURE;}
+	microblaze_enable_interrupts();
+	/***************************************************************/
+	//Setup for main loop
+	/***************************************************************/
 	XUartLite_SetSendHandler(&uartCtr, SendHandler, &uartCtr);
 	XUartLite_SetRecvHandler(&uartCtr, RecvHandler, &uartCtr);
 	XUartLite_EnableInterrupt(&uartCtr);
 
-	//printUartLiteProperties();
-	/***************************************************************/
-	//Interrupt Controller.
-	/***************************************************************/
-	Status = XIntc_Initialize(&InterruptController, XPAR_AXI_INTC_0_DEVICE_ID);
-		if (Status != XST_SUCCESS) {return XST_FAILURE;}
-	Status = SetUpInterruptSystem(&InterruptController);
-		if (Status != XST_SUCCESS) {return XST_FAILURE;}
-	microblaze_enable_interrupts();
 
-	/***************************************************************/
-	//Setup for main loop
-	/***************************************************************/
-
-
-	char* sendExp = "Send Buff : ";
-	printBuffer((&testPack)->buffer,sendExp);
+	printBuffer((&testPack)->buffer,"Send Buff");
 	xil_printf("Entering Main Loop\r\n");
 
-	XUartLite_Recv(&uartCtr,RecvBuffer,1);
+	XUartLite_Recv(&uartCtr,RecvBuffer,4);
 	u32 oldSwitch = 0x0;
 	while (1)
 		{
 			if(handleType){
-				XUartLite_DisableInterrupt(&uartCtr);
-				int recvCount=0;
-				while(!XUartLite_IsReceiveEmpty((&uartCtr)->RegBaseAddress)){
-				recvCount = XUartLite_Recv(&uartCtr,RecvBuffer,16);
+				if(XUartLite_IsReceiveEmpty(XPAR_AXI_UARTLITE_0_BASEADDR)){
+
+				//XUartLite_DisableInterrupt(&uartCtr);
+				int recvCount=TotalReceivedCount;
+				//while(XUartLite_IsReceiveEmpty((&uartCtr)->RegBaseAddress)){
+				//recvCount = XUartLite_Recv(&uartCtr,RecvBuffer,1);
 				vector_appendArray(&dataVector, RecvBuffer,recvCount);
-
-				}
+				//}
 				handleType=0;
-				char * recvExp= "Received Buffer";
-				printBuffer(RecvBuffer,recvExp);
-				XUartLite_EnableInterrupt(&uartCtr);
-			}else{
-				XUartLite_EnableInterrupt(&uartCtr);
-				XUartLite_Recv(&uartCtr,RecvBuffer,1);
-			}
+				printBuffer(RecvBuffer,"Received Buffer");
+				//XUartLite_EnableInterrupt(&uartCtr);
+				XUartLite_Recv(&uartCtr,RecvBuffer,4);
+				}
+				else {
+					u8 byte = XUartLite_RecvByte(XPAR_AXI_UARTLITE_0_BASEADDR);
+					vector_add(&dataVector,byte) ;
+				}
 
+			}
 			u32 switchInput = XGpio_DiscreteRead(&GpioInput,1);
 			if(switchInput != 0){
 
@@ -201,7 +197,6 @@ void printIntcProperties() {
 
 void printUartLiteProperties() {
 	u32 Status_Reg = XUartLite_GetStatusReg((&uartCtr)->RegBaseAddress);
-	//u32 Rx_fifo = XUartLite_ReadReg((&uartCtr)->RegBaseAddress,XUL_RX_FIFO_OFFSET);
 	xil_printf("Status_Reg : 0x%X\r\n",Status_Reg );
 	u32 isIntrEnabled = Status_Reg & XUL_SR_INTR_ENABLED;
 	u32 isRxValidData = Status_Reg & XUL_SR_RX_FIFO_VALID_DATA;
@@ -214,31 +209,34 @@ void printUartLiteProperties() {
 
 }
 
-int SetUpInterruptSystem(XIntc *XIntcInstancePtr)
+int SetUpInterruptSystem()
 {
 	int Status;
 
+	Status = XIntc_Initialize(&InterruptController, XPAR_AXI_INTC_0_DEVICE_ID);
+			if (Status != XST_SUCCESS) {return XST_FAILURE;}
 
-	Status = XIntc_Connect(XIntcInstancePtr, XPAR_AXI_INTC_0_AXI_UARTLITE_0_INTERRUPT_INTR,
+
+	Status = XIntc_Connect(&InterruptController, XPAR_INTC_0_UARTLITE_0_VEC_ID,
 					   (XInterruptHandler)XUartLite_InterruptHandler,
 					   (void *)&uartCtr);
 		if (Status != XST_SUCCESS) {
 			return XST_FAILURE;
 		}
 
-	Status = XIntc_Start(XIntcInstancePtr, XIN_REAL_MODE);
+	Status = XIntc_Start(&InterruptController, XIN_REAL_MODE);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	XIntc_Enable(XIntcInstancePtr, XPAR_AXI_INTC_0_AXI_TIMER_0_INTERRUPT_INTR);
-	XIntc_Enable(XIntcInstancePtr, XPAR_AXI_INTC_0_AXI_UARTLITE_0_INTERRUPT_INTR);
+	XIntc_Enable(&InterruptController, XPAR_AXI_INTC_0_AXI_TIMER_0_INTERRUPT_INTR);
+	XIntc_Enable(&InterruptController, XPAR_INTC_0_UARTLITE_0_VEC_ID);
 
 	Xil_ExceptionInit();
 
 	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
 				(Xil_ExceptionHandler)XIntc_InterruptHandler,
-				XIntcInstancePtr);
+				&InterruptController);
 
 	Xil_ExceptionEnable();
 
@@ -281,19 +279,23 @@ void SendHandler(void *CallBackRef, unsigned int EventData)
 }
 void RecvHandler(void *CallBackRef, unsigned int EventData)
 {
-	if((RecvBuffer[0] == flagByte) |(RecvBuffer[0] != '\0') ){
-		vector_add(&dataVector,RecvBuffer[0]);
-		handleType=1;
-		XUartLite_DisableInterrupt(&uartCtr);
-	}
-	else{
-		handleType=0;
-	}
-    TotalReceivedCount = EventData;
-    xil_printf("REC COUNT : 0x%X\r\n", TotalReceivedCount);
+	handleType=1;
+	TotalReceivedCount = EventData;
 }
 void printBuffer(u8 buffer[MAX_BUFFER_SIZE], char* exp){
 	unsigned char * sendData;
 	sendData = buffer;
 	xil_printf("%s : %s\r\n",exp, sendData);
+	int i = 0;
+	while(buffer[i]!='\0'){
+		xil_printf("0x%X ",buffer[i]);
+		i++;
+	}
+	if(buffer[i]=='\0'){xil_printf("\r\n");}
 }
+
+
+
+
+
+

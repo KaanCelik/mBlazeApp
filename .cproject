@@ -35,7 +35,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.1194878376" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.1968544177" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.1419561780" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/include"/>
 								</option>
 								<inputType id="xilinx.gnu.compiler.input.206021588" name="C source files" superClass="xilinx.gnu.compiler.input"/>
 							</tool>
@@ -49,7 +49,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.1052189901" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.1449928300" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.777397145" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/include"/>
 								</option>
 							</tool>
 							<tool id="xilinx.gnu.mb.toolchain.archiver.801235424" name="MicroBlaze archiver" superClass="xilinx.gnu.mb.toolchain.archiver"/>
@@ -61,7 +61,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.365758560" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.1530941784" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.1075990100" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.1862632926" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -81,7 +81,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.1354466216" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.1865304772" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.599074716" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.646210626" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -747,7 +747,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.1566223318" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.1746919874" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.1212740869" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/include"/>
 								</option>
 								<inputType id="xilinx.gnu.compiler.input.1867731481" name="C source files" superClass="xilinx.gnu.compiler.input"/>
 							</tool>
@@ -760,7 +760,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.685527514" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.2104776441" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.173121898" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/include"/>
 								</option>
 							</tool>
 							<tool id="xilinx.gnu.mb.toolchain.archiver.1093519676" name="MicroBlaze archiver" superClass="xilinx.gnu.mb.toolchain.archiver"/>
@@ -771,7 +771,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.13735188" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.236589068" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.1212692204" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.1519407377" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -790,7 +790,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.764207643" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.1887482951" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.768048527" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="../../mBlaze_v1.2.1_bsp/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.47925104" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
