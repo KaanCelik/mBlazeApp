@@ -77,7 +77,9 @@ void vector_appendArray(Vector* v, unsigned char* buffer, int size){
 		}
 }
 void printVector(Vector * v){
+	xil_printf("Vector : \r\n");
 	int i;
+
 	for (i = 0; i < vector_count(v); i++) {
 			xil_printf("v[%d]: %c\n",i, *(vector_get(v, i)));
 		}

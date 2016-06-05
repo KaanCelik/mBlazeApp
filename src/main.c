@@ -10,26 +10,22 @@
 #include "xbasic_types.h"
 #include "xgpio.h"
 #include "xstatus.h"
-#include "xintc.h"
-#include "xintc_l.h"
-#include "xil_exception.h"
 #include "xil_io.h"
 #include "xuartlite.h"
 #include "xuartlite_l.h"
 #include "string.h"
 #include "Protocol.h"
 #include "Utilities/Vector.h"
-
+#include "Utilities/Util.h"
+#include "DeviceControllers/IntrController.h"
 
 
 #define MAX_BUFFER_SIZE 16
-
 /*** Devices *****************************************************/
 XGpio GpioOutput;
 XGpio GpioInput;
-
-XIntc InterruptController;
 XUartLite uartCtr;
+
 /*** Variables *****************************************************/
 Xuint32 DataRead;
 Xuint32 OldData;
@@ -39,67 +35,62 @@ u8 SendBuffer[MAX_BUFFER_SIZE];    /* Buffer for Transmitting Data */
 u8 RecvBuffer[MAX_BUFFER_SIZE];    /* Buffer for Receiving Data */
 int TotalReceivedCount;
 int TotalSentCount;
-u8 startReceiving;
 Vector dataVector;
-
 volatile u8 handleType;
-/******************************************************************/
+
 /*** Methods ******************************************************/
 Xuint32 initLed();
 Xuint32 initSwitch();
-
-int SetUpInterruptSystem();
-void printIntcProperties();
 void printUartLiteProperties();
 u32 sendString(unsigned char* data);
 void SendHandler(void *CallBackRef, unsigned int EventData);
 void RecvHandler(void *CallBackRef, unsigned int EventData);
-void printBuffer(u8 buffer[MAX_BUFFER_SIZE], char* exp);
+int rxHasValidData();
 /******************************************************************/
-
 
 
 int main()
 {
-	vector_init(&dataVector);
-	memset(RecvBuffer, 0, sizeof(RecvBuffer));
-
-	Packet testPack;
-	char sampleData[] = "sample";
-	int sampleSize = strlen(sampleData);
-	data = sampleData;
-	dataSize = sampleSize;
-	constructPacket(&testPack);
-
+	//Initialize basic setup
+	/***************************************************************/
 	int Status;
 	init_platform();
+	vector_init(&dataVector);
 	xil_printf("%c[2J", 27);
+	memset(RecvBuffer, 0, sizeof(RecvBuffer));
+
+	//Setup test message to send
+	/***************************************************************/
+	Packet testPack;
+	testPack.rawSize=strlen("sample");
+	testPack.rawData = "sample";
+	constructPacket(&testPack);
 	/***************************************************************/
 	//Input Output Devices
 	/***************************************************************/
 	Status = initLed();
-		if (Status != XST_SUCCESS){return XST_FAILURE;}
+	checkStatus(Status);
 	Status =initSwitch();
-		if (Status != XST_SUCCESS){return XST_FAILURE;}
+	checkStatus(Status);
 	/***************************************************************/
 	//Axi Timer
-	/***************************************************************/
-	//Status = initAxiTimer();if (Status != XST_SUCCESS) {return XST_FAILURE;}
 	/***************************************************************/
 	//UartLite
 	/***************************************************************/
 	Status = XUartLite_Initialize(&uartCtr,XPAR_AXI_UARTLITE_0_DEVICE_ID );
-	xil_printf("Uart Status : 0x%X\r\n", Status);
-	if (Status != XST_SUCCESS) {return XST_FAILURE;}
+	checkStatus(Status);
 	XUartLite_ResetFifos(&uartCtr);
 	Status = XUartLite_SelfTest(&uartCtr);
 	xil_printf("Uart Status : 0x%X\r\n", Status);
-	if (Status != XST_SUCCESS) {return XST_FAILURE;}
+	checkStatus(Status);
 	/***************************************************************/
 	//Interrupt Controller.
 	/***************************************************************/
-	Status = SetUpInterruptSystem();
-	if (Status != XST_SUCCESS) {return XST_FAILURE;}
+	Status = initInterruptSystem();
+	connectInterrupts(&uartCtr);
+	startIntrController();
+	enableIntrController();
+	checkStatus(Status);
 	microblaze_enable_interrupts();
 	/***************************************************************/
 	//Setup for main loop
@@ -107,35 +98,17 @@ int main()
 	XUartLite_SetSendHandler(&uartCtr, SendHandler, &uartCtr);
 	XUartLite_SetRecvHandler(&uartCtr, RecvHandler, &uartCtr);
 	XUartLite_EnableInterrupt(&uartCtr);
-
+	XUartLite_Recv(&uartCtr,RecvBuffer,8);
 
 	printBuffer((&testPack)->buffer,"Send Buff");
-	xil_printf("Entering Main Loop\r\n");
 
-	XUartLite_Recv(&uartCtr,RecvBuffer,4);
+
+	xil_printf("Entering Main Loop\r\n");
 	u32 oldSwitch = 0x0;
+
 	while (1)
 		{
-			if(handleType){
-				if(XUartLite_IsReceiveEmpty(XPAR_AXI_UARTLITE_0_BASEADDR)){
 
-				//XUartLite_DisableInterrupt(&uartCtr);
-				int recvCount=TotalReceivedCount;
-				//while(XUartLite_IsReceiveEmpty((&uartCtr)->RegBaseAddress)){
-				//recvCount = XUartLite_Recv(&uartCtr,RecvBuffer,1);
-				vector_appendArray(&dataVector, RecvBuffer,recvCount);
-				//}
-				handleType=0;
-				printBuffer(RecvBuffer,"Received Buffer");
-				//XUartLite_EnableInterrupt(&uartCtr);
-				XUartLite_Recv(&uartCtr,RecvBuffer,4);
-				}
-				else {
-					u8 byte = XUartLite_RecvByte(XPAR_AXI_UARTLITE_0_BASEADDR);
-					vector_add(&dataVector,byte) ;
-				}
-
-			}
 			u32 switchInput = XGpio_DiscreteRead(&GpioInput,1);
 			if(switchInput != 0){
 
@@ -144,14 +117,11 @@ int main()
 				}
 				if(oldSwitch<switchInput){
 					if(switchInput==1){
-
 						Status = sendString((unsigned char *)((&testPack)->buffer) );
-						if (Status != XST_SUCCESS) {xil_printf("Send Fail!\r\n");return XST_FAILURE;}
-
+						checkSendSuccess(Status);
 					}
 					if(switchInput==2){
-						char* exp = "Received Buffer";
-						printBuffer(RecvBuffer,exp);
+						printBuffer(RecvBuffer,"Received Buffer");
 					}
 					if(switchInput==4){
 						printUartLiteProperties();
@@ -159,8 +129,10 @@ int main()
 					if(switchInput==8){
 						printVector(&dataVector);
 					}
-
-
+					if(switchInput==16){
+						Status = sendString((unsigned char *)"AT");
+						checkSendSuccess(Status);
+					}
 				}
 			}
 			oldSwitch = switchInput;
@@ -173,27 +145,22 @@ Xuint32 initLed() {
 
 	Xuint32 status = XGpio_Initialize(&GpioOutput, XPAR_LEDS_8BITS_DEVICE_ID);
 	xil_printf("LED Status : %X\r\n", status);
-	if (status != XST_SUCCESS){return XST_FAILURE;}
-	XGpio_SetDataDirection(&GpioOutput, 1, 0x0);
+	if(status == XST_SUCCESS){
+		XGpio_SetDataDirection(&GpioOutput, 1, 0x0);
+	}
 	return status;
 }
 Xuint32 initSwitch() {
 
 	Xuint32 status = XGpio_Initialize(&GpioInput, XPAR_DIP_SWITCHES_8BITS_DEVICE_ID);
 	xil_printf("8 BITS Switch Status : %X\r\n", status);
-	if (status != XST_SUCCESS){return XST_FAILURE;}
-	XGpio_SetDataDirection(&GpioInput, 1, 0xFFFFFFFF);
+	if(status == XST_SUCCESS){
+		XGpio_SetDataDirection(&GpioInput, 1, 0xFFFFFFFF);
+	}
 	return status;
 }
 
-void printIntcProperties() {
-	u32 ISR = XIntc_In32((&InterruptController)->BaseAddress + XIN_ISR_OFFSET);
-	u32 IER = XIntc_In32((&InterruptController)->BaseAddress + XIN_IER_OFFSET);
-	u32 IPR = XIntc_In32((&InterruptController)->BaseAddress + XIN_IPR_OFFSET);
-	u32 IAR = XIntc_In32((&InterruptController)->BaseAddress + XIN_IAR_OFFSET);
-	u32 MER = XIntc_In32((&InterruptController)->BaseAddress + XIN_MER_OFFSET);
-	xil_printf("ISR Reg : 0x%X  IER : 0x%X  IPR : 0x%X IAR : 0x%X  MER : 0x%X\r\n",ISR,IER,IPR,IAR,MER );
-}
+
 
 void printUartLiteProperties() {
 	u32 Status_Reg = XUartLite_GetStatusReg((&uartCtr)->RegBaseAddress);
@@ -208,41 +175,13 @@ void printUartLiteProperties() {
 	xil_printf("| %d          | %d           | %d          | %d       | %d     | %d      |\r\n",isIntrEnabled,isRxValidData,isRxFifoFull,overrunError,frameError,parityError );
 
 }
-
-int SetUpInterruptSystem()
-{
-	int Status;
-
-	Status = XIntc_Initialize(&InterruptController, XPAR_AXI_INTC_0_DEVICE_ID);
-			if (Status != XST_SUCCESS) {return XST_FAILURE;}
-
-
-	Status = XIntc_Connect(&InterruptController, XPAR_INTC_0_UARTLITE_0_VEC_ID,
-					   (XInterruptHandler)XUartLite_InterruptHandler,
-					   (void *)&uartCtr);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
-	Status = XIntc_Start(&InterruptController, XIN_REAL_MODE);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	XIntc_Enable(&InterruptController, XPAR_AXI_INTC_0_AXI_TIMER_0_INTERRUPT_INTR);
-	XIntc_Enable(&InterruptController, XPAR_INTC_0_UARTLITE_0_VEC_ID);
-
-	Xil_ExceptionInit();
-
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-				(Xil_ExceptionHandler)XIntc_InterruptHandler,
-				&InterruptController);
-
-	Xil_ExceptionEnable();
-
-	return XST_SUCCESS;
-
+int rxHasValidData(){
+	u32 Status_Reg = XUartLite_GetStatusReg((&uartCtr)->RegBaseAddress);
+	u32 isRxValidData = Status_Reg & XUL_SR_RX_FIFO_VALID_DATA;
+	return isRxValidData;
 }
+
+
 
 u32 sendString(unsigned char* data) {
 
@@ -251,48 +190,46 @@ u32 sendString(unsigned char* data) {
 	for (Index = 0; Index < MAX_BUFFER_SIZE; Index++)
 	    {
 			SendBuffer[Index] = data[Index];
-
 			if(data[Index] == '\0'){
 				break;
 			}
-
 	    }
-	char * sendExp = "SendData";
-	printBuffer(SendBuffer,sendExp);
+	printBuffer(SendBuffer,"Sending data");
 	int size =  strlen((char*)data);
 	sentCount = XUartLite_Send(&uartCtr, data, size);
 	while(XUartLite_IsSending(&uartCtr)){
-
+		/*
+		 * Sleep during the uart sends data
+		 */
 	}
-	    if (sentCount != size)
-	    {
-	    	return XST_FAILURE;
-	    }
-
-	    return XST_SUCCESS;
+	checkSendSuccess(sentCount - size);
+	return XST_SUCCESS;
 }
 
 void SendHandler(void *CallBackRef, unsigned int EventData)
 {
     TotalSentCount = EventData;
-    xil_printf("TotalSentCount : 0x%X\r\n", TotalSentCount);
+    xil_printf("SendEvent : 0x%X\r\n", TotalSentCount);
 }
 void RecvHandler(void *CallBackRef, unsigned int EventData)
 {
-	handleType=1;
-	TotalReceivedCount = EventData;
-}
-void printBuffer(u8 buffer[MAX_BUFFER_SIZE], char* exp){
-	unsigned char * sendData;
-	sendData = buffer;
-	xil_printf("%s : %s\r\n",exp, sendData);
-	int i = 0;
-	while(buffer[i]!='\0'){
-		xil_printf("0x%X ",buffer[i]);
-		i++;
+	XUartLite_DisableInterrupt(&uartCtr);
+	vector_appendArray(&dataVector,RecvBuffer,EventData);
+	int rcvCount=0;
+	while(!XUartLite_IsReceiveEmpty(XPAR_AXI_UARTLITE_0_BASEADDR)){
+		rcvCount = XUartLite_Recv(&uartCtr,RecvBuffer,1);
+		if(rcvCount){
+			xil_printf("Data received\r\n");
+			printBuffer(RecvBuffer, "Received buffer");
+			vector_appendArray(&dataVector,RecvBuffer,EventData);
+		}
 	}
-	if(buffer[i]=='\0'){xil_printf("\r\n");}
+	TotalReceivedCount = EventData;
+	xil_printf("RcvEvent : 0x%X\r\n", TotalReceivedCount);
+	XUartLite_EnableInterrupt(&uartCtr);
+	XUartLite_Recv(&uartCtr,RecvBuffer,8);
 }
+
 
 
 

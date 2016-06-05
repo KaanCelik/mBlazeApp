@@ -24,11 +24,11 @@ void constructPacket(Packet * packetPtr){
 	tempBuffer[packetPtr->size-2] = flagByte;
 	int c=0;
 	for (index = 0; index < packetPtr->size-2; index++){
-		tempBuffer[packetPtr->size-3-index-c] = data[dataSize-index];
-		if(data[dataSize-index] == '\0'){
+		tempBuffer[packetPtr->size-3-index-c] = packetPtr->rawData[packetPtr->rawSize-index];
+		if(packetPtr->rawData[packetPtr->rawSize-index] == '\0'){
 					tempBuffer[packetPtr->size-3-index-c]= '#';
 				}
-		if((data[dataSize-index] == flagByte) | (data[dataSize-index] == escByte )){
+		if((packetPtr->rawData[packetPtr->rawSize-index] == flagByte) | (packetPtr->rawData[packetPtr->rawSize-index] == escByte )){
 			c++;
 			tempBuffer[packetPtr->size-3-index-c]= escByte;
 		}
@@ -37,11 +37,11 @@ void constructPacket(Packet * packetPtr){
 	packetPtr->buffer = tempBuffer;
 }
 
-int extractPacketSize(){
+int extractPacketSize(Packet * packetPtr){
 	static int packetSize=0;
 	int index;
-	for (index = 0; index < dataSize; index++){
-			if((data[index] == flagByte) | (data[index] == escByte )){
+	for (index = 0; index < packetPtr->rawSize; index++){
+			if((packetPtr->rawData[index] == flagByte) | (packetPtr->rawData[index] == escByte )){
 				packetSize++;
 			}
 			packetSize++;

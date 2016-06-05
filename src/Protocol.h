@@ -17,11 +17,10 @@ char escByte;
 typedef struct Packet{
 	u8* buffer;
 	int size;
+	char* rawData;
+	int rawSize;
 }Packet;
 
-
-char * data;
-int dataSize;
 
 Packet packet;
 
