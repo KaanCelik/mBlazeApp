@@ -25,6 +25,7 @@
 XGpio GpioOutput;
 XGpio GpioInput;
 XUartLite uartCtr;
+XUartLite uartCtr_1;
 
 /*** Variables *****************************************************/
 Xuint32 DataRead;
@@ -42,7 +43,7 @@ volatile u8 handleType;
 Xuint32 initLed();
 Xuint32 initSwitch();
 void printUartLiteProperties();
-u32 sendString(unsigned char* data);
+u32 sendString(u8* data, XUartLite* uartInstancePtr);
 void SendHandler(void *CallBackRef, unsigned int EventData);
 void RecvHandler(void *CallBackRef, unsigned int EventData);
 int rxHasValidData();
@@ -83,6 +84,13 @@ int main()
 	Status = XUartLite_SelfTest(&uartCtr);
 	xil_printf("Uart Status : 0x%X\r\n", Status);
 	checkStatus(Status);
+
+	Status = XUartLite_Initialize(&uartCtr_1,XPAR_AXI_UARTLITE_1_DEVICE_ID );
+	checkStatus(Status);
+	XUartLite_ResetFifos(&uartCtr_1);
+	Status = XUartLite_SelfTest(&uartCtr_1);
+	xil_printf("Uart_1 Status : 0x%X\r\n", Status);
+	checkStatus(Status);
 	/***************************************************************/
 	//Interrupt Controller.
 	/***************************************************************/
@@ -99,6 +107,8 @@ int main()
 	XUartLite_SetRecvHandler(&uartCtr, RecvHandler, &uartCtr);
 	XUartLite_EnableInterrupt(&uartCtr);
 	XUartLite_Recv(&uartCtr,RecvBuffer,8);
+
+	XUartLite_DisableInterrupt(&uartCtr_1);
 
 	printBuffer((&testPack)->buffer,"Send Buff");
 
@@ -117,7 +127,7 @@ int main()
 				}
 				if(oldSwitch<switchInput){
 					if(switchInput==1){
-						Status = sendString((unsigned char *)((&testPack)->buffer) );
+						Status = sendString((unsigned char *)((&testPack)->buffer) ,&uartCtr);
 						checkSendSuccess(Status);
 					}
 					if(switchInput==2){
@@ -130,8 +140,48 @@ int main()
 						printVector(&dataVector);
 					}
 					if(switchInput==16){
-						Status = sendString((unsigned char *)"AT");
+						Status = sendString((unsigned char *)"AT",&uartCtr);
 						checkSendSuccess(Status);
+					}
+					if(switchInput==32){
+
+						sendString((u8*)"JESSIE",&uartCtr_1);
+
+						u8 lcdSendBuffer[16];
+						unsigned char escSeq[3] = {0x1B,'[', '\0'};
+
+						strcpy((char*)lcdSendBuffer,(char*)escSeq);
+						strcat((char*)lcdSendBuffer,"3e");
+						sendString(lcdSendBuffer,&uartCtr_1);
+						memset((char*)lcdSendBuffer, 0, 16);
+
+
+						strcpy((char*)lcdSendBuffer,(char*)escSeq);
+						strcat((char*)lcdSendBuffer,"j");
+						sendString(lcdSendBuffer,&uartCtr_1);
+
+						memset(lcdSendBuffer, 0, 16);
+						strcat((char*)lcdSendBuffer,(char*)escSeq);
+						strcat((char*)lcdSendBuffer,"0;1H");
+						sendString(lcdSendBuffer,&uartCtr_1);
+
+						memset(lcdSendBuffer, 0, 16);
+						strcat((char*)lcdSendBuffer,"Slaap lekker...");
+						sendString(lcdSendBuffer,&uartCtr_1);
+
+						memset(lcdSendBuffer, 0, 16);
+						strcat((char*)lcdSendBuffer,(char*)escSeq);
+						strcat((char*)lcdSendBuffer,"1;1H");
+						sendString(lcdSendBuffer,&uartCtr_1);
+
+						memset(lcdSendBuffer, 0, 16);
+						strcat((char*)lcdSendBuffer,"I love you !");
+						sendString(lcdSendBuffer,&uartCtr_1);
+
+
+
+
+
 					}
 				}
 			}
@@ -183,7 +233,7 @@ int rxHasValidData(){
 
 
 
-u32 sendString(unsigned char* data) {
+u32 sendString(u8* data, XUartLite* uartInstancePtr) {
 
 	u32 sentCount;
 	int Index;
@@ -196,8 +246,8 @@ u32 sendString(unsigned char* data) {
 	    }
 	printBuffer(SendBuffer,"Sending data");
 	int size =  strlen((char*)data);
-	sentCount = XUartLite_Send(&uartCtr, data, size);
-	while(XUartLite_IsSending(&uartCtr)){
+	sentCount = XUartLite_Send(uartInstancePtr, data, size);
+	while(XUartLite_IsSending(uartInstancePtr)){
 		/*
 		 * Sleep during the uart sends data
 		 */
