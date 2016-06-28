@@ -21,7 +21,7 @@
 #include "../Utilities/Util.h"
 
 int initInterruptSystem();
-int connectInterrupts(XUartLite* uartCtr);
+int connectInterrupts(void* intrSrcPtr, u16 intrVecId,XInterruptHandler intrSrcHandler);
 int startIntrController();
 void enableIntrController();
 void printIntcProperties();

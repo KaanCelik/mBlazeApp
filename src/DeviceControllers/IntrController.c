@@ -24,11 +24,9 @@ void enableIntrController() {
 				&IntrCtr);
 	Xil_ExceptionEnable();
 }
-int connectInterrupts(XUartLite* uartCtr){
+int connectInterrupts(void* intrSrcPtr, u16 intrVecId,XInterruptHandler intrSrcHandler){
 	int status;
-	status = XIntc_Connect(&IntrCtr, XPAR_INTC_0_UARTLITE_0_VEC_ID,
-							(XInterruptHandler)XUartLite_InterruptHandler,
-							(void *)uartCtr);
+	status = XIntc_Connect(&IntrCtr, intrVecId,intrSrcHandler,intrSrcPtr);
 	return status;
 }
 
