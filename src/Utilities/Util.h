@@ -10,11 +10,12 @@
 #include "xbasic_types.h"
 #include <stdio.h>
 
-#define checkStatus(status) if (status != XST_SUCCESS){return XST_FAILURE;}
+#define checkStatus(status) if (status != XST_SUCCESS){xil_printf("Fail!\r\n");return XST_FAILURE;}
 #define checkSendSuccess(status)if (status != XST_SUCCESS) {xil_printf("Send Fail!\r\n");return XST_FAILURE;}
 
 
 void printBuffer(u8* buffer, char* exp);
+void printStatus(char* message, int status);
 
 #endif /* UTIL_H_ */
 

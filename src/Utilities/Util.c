@@ -17,3 +17,6 @@ void printBuffer(u8* buffer, char* exp){
 	}
 	if(buffer[i]=='\0'){xil_printf("\r\n");}
 }
+void printStatus(char* message, int status) {
+	xil_printf("%s%d\r\n",message, status);
+}

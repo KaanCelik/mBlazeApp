@@ -57,5 +57,4 @@ void printUartLiteProperties(XUartLite* uartPtr) {
 	u32 parityError = Status_Reg & XUL_SR_PARITY_ERROR;
 	xil_printf("|Intr_Enabled | RxValidData | RxFifoFull | Overrun | Frame | Parity |\r\n");
 	xil_printf("| %d          | %d           | %d          | %d       | %d     | %d      |\r\n",isIntrEnabled,isRxValidData,isRxFifoFull,overrunError,frameError,parityError );
-
 }

@@ -15,6 +15,6 @@
 u8 SendBuffer[MAX_BUFFER_SIZE];    /* Buffer for Transmitting Data */
 u8 RecvBuffer[MAX_BUFFER_SIZE];    /* Buffer for Receiving Data */
 u16 initUartController(XUartLite* uartPtr, u16 uartDeviceId);
-void SendHandler(void *CallBackRef, unsigned int EventData);
-void RecvHandler(void *CallBackRef, unsigned int EventData);
+u16 sendString(u8* data, XUartLite* uartPtr);
+void printUartLiteProperties(XUartLite* uartPtr) ;
 #endif /* UARTCONTROLLER_H_ */

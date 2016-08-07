@@ -12,31 +12,22 @@
 #include "xstatus.h"
 #include "xil_io.h"
 #include "string.h"
-#include "Protocol.h"
-#include "Utilities/Vector.h"
 #include "Utilities/Util.h"
 #include "DeviceControllers/IntrController.h"
-#include "DeviceControllers/UartController.h"
-
+#include "DeviceControllers/BramController.h"
+#include "Bluetooth.h"
 
 /*** Devices *****************************************************/
 XGpio GpioOutput;
 XGpio GpioInput;
-XUartLite uartCtr;
 XUartLite uartCtr_1;
-
 /*** Variables *****************************************************/
-Xuint32 DataRead;
-Xuint32 OldData;
-volatile int* regLED = (int*) XPAR_DIGILENT_SEVSEG_DISP_BASEADDR;
-Vector dataVector;
+
 /*** Methods ******************************************************/
 Xuint32 initLed();
 Xuint32 initSwitch();
-void SendHandler(void *CallBackRef, unsigned int EventData);
-void RecvHandler(void *CallBackRef, unsigned int EventData);
+u8 saveUserInput();
 /******************************************************************/
-
 
 int main()
 {
@@ -46,11 +37,6 @@ int main()
 	init_platform();
 	xil_printf("%c[2J", 27);
 	/***************************************************************/
-	//Local data stack
-	/***************************************************************/
-	vector_init(&dataVector);
-	memset(RecvBuffer, 0, sizeof(RecvBuffer));
-	/***************************************************************/
 	//Input Output Devices
 	/***************************************************************/
 	Status = initLed();
@@ -58,19 +44,28 @@ int main()
 	Status =initSwitch();
 	checkStatus(Status);
 	/***************************************************************/
-	//Axi Timer
+	//Bram Controller
+	/***************************************************************/
+	brc_selfTestBramController();
+
+	//brc_selfTestBramController('A');
+	//brc_selfTestBramController('B');
 	/***************************************************************/
 	//UartLite
 	/***************************************************************/
-	Status = initUartController(&uartCtr,XPAR_AXI_UARTLITE_0_DEVICE_ID );
 	xil_printf("Uart Status : 0x%X\r\n", Status);
 	Status = initUartController(&uartCtr_1,XPAR_AXI_UARTLITE_1_DEVICE_ID );
 	xil_printf("Uart_1 Status : 0x%X\r\n", Status);
 	/***************************************************************/
+	//Bluetooth
+	/***************************************************************/
+	Status = bt_setUp(XPAR_UARTLITE_0_DEVICE_ID);
+	checkStatus(Status);
+	/***************************************************************/
 	//Interrupt Controller.
 	/***************************************************************/
 	Status = initInterruptSystem();
-	connectInterrupts(&uartCtr,XPAR_INTC_0_UARTLITE_0_VEC_ID,(XInterruptHandler)XUartLite_InterruptHandler);
+	connectInterrupts(bt_getPtr(),XPAR_INTC_0_UARTLITE_0_VEC_ID,(XInterruptHandler)XUartLite_InterruptHandler);
 	startIntrController();
 	enableIntrController();
 	checkStatus(Status);
@@ -78,13 +73,12 @@ int main()
 	/***************************************************************/
 	//Setup Uart Intr Handlers
 	/***************************************************************/
-	XUartLite_SetSendHandler(&uartCtr, SendHandler, &uartCtr);
-	XUartLite_SetRecvHandler(&uartCtr, RecvHandler, &uartCtr);
-	XUartLite_EnableInterrupt(&uartCtr);
+	bt_setUpIntr();
+	bt_start(1);
 	/***************************************************************/
-	XUartLite_Recv(&uartCtr,RecvBuffer,8);
-	XUartLite_DisableInterrupt(&uartCtr_1);
 
+	XUartLite_DisableInterrupt(&uartCtr_1);
+	brc_init();
 	xil_printf("Entering Main Loop\r\n");
 	u32 oldSwitch = 0x0;
 
@@ -99,20 +93,23 @@ int main()
 				}
 				if(oldSwitch<switchInput){
 					if(switchInput==1){
-						Status = sendString((unsigned char *)"This is a test.",&uartCtr);
+						bt_send("This is a test.");
+						//Status = sendString((unsigned char *)"This is a test.",&blueToothUartCtr);
 						checkSendSuccess(Status);
 					}
 					if(switchInput==2){
-						printBuffer(RecvBuffer,"Received Buffer");
+						Status = saveUserInput();
+						printStatus("User Input Received. XST_STATUS : ", Status );
+						//printBuffer(RecvBuffer,"Received Buffer");
 					}
 					if(switchInput==4){
-						printUartLiteProperties();
+						brc_selfTestBramController();
 					}
 					if(switchInput==8){
-						printVector(&dataVector);
+						//printVector(&dataVector);
 					}
 					if(switchInput==16){
-						Status = sendString((unsigned char *)"AT",&uartCtr);
+						bt_send("AT");
 						checkSendSuccess(Status);
 					}
 					if(switchInput==32){
@@ -178,27 +175,29 @@ Xuint32 initSwitch() {
 	return status;
 }
 
-void SendHandler(void *CallBackRef, unsigned int EventData)
-{
-    xil_printf("SendEvent : 0x%X\r\n", EventData);
-}
-void RecvHandler(void *CallBackRef, unsigned int EventData)
-{
-	XUartLite_DisableInterrupt(&uartCtr);
-	vector_appendArray(&dataVector,RecvBuffer,EventData);
-	int rcvCount=0;
-	while(!XUartLite_IsReceiveEmpty(XPAR_AXI_UARTLITE_0_BASEADDR)){
-		rcvCount = XUartLite_Recv(&uartCtr,RecvBuffer,1);
-		if(rcvCount){
-			xil_printf("Data received\r\n");
-			printBuffer(RecvBuffer, "Received buffer");
-			vector_appendArray(&dataVector,RecvBuffer,EventData);
-		}
+u8 saveUserInput(){
+	u8 success = FALSE;
+	u8 status;
+	if (bt_getPacketFlag() == TRUE) {
+		Vector* btStack = bt_getStack();
+		status = brc_saveStack(btStack);
+		checkStatus(status);
+		bt_setPacketFlag(FALSE);
+		Vector* brStack = brc_getStack();
+		printVectorWithName(btStack, "btVector : ");
+		printVectorWithName(brStack, "brVector : ");
+		Vector* brLastPacket = vector_split(brStack, btStack->count);
+		success = vector_equals(btStack, brLastPacket);
+		vector_destruct(brLastPacket);
 	}
-	xil_printf("RcvEvent : 0x%X\r\n", EventData);
-	XUartLite_EnableInterrupt(&uartCtr);
-	XUartLite_Recv(&uartCtr,RecvBuffer,8);
+	if (success) {
+		return XST_SUCCESS;
+	} else {
+		return XST_FAILURE;
+	}
+
 }
+
 
 
 

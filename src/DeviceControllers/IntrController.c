@@ -16,7 +16,7 @@ int initInterruptSystem()
 	return XST_SUCCESS;
 }
 void enableIntrController() {
-	XIntc_Enable(&IntrCtr, XPAR_AXI_INTC_0_AXI_TIMER_0_INTERRUPT_INTR);
+	//XIntc_Enable(&IntrCtr, XPAR_AXI_INTC_0_AXI_TIMER_0_INTERRUPT_INTR);
 	XIntc_Enable(&IntrCtr, XPAR_INTC_0_UARTLITE_0_VEC_ID);
 	Xil_ExceptionInit();
 	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
