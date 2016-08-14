@@ -47,5 +47,5 @@ Temporary Items
 .apdisk
 
 #Generated Files
-Debug/
-Release/
+Debug
+Release
