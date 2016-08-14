@@ -45,10 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-*.elf
-*.size
-*.d
-*.mk
-*.o
-*.d
-*.d
+
+#Generated Files
+Debug/
+Release/

@@ -11,8 +11,10 @@
 #include <stdio.h>
 
 #define checkStatus(status) if (status != XST_SUCCESS){xil_printf("Fail!\r\n");return XST_FAILURE;}
-#define checkSendSuccess(status)if (status != XST_SUCCESS) {xil_printf("Send Fail!\r\n");return XST_FAILURE;}
+#define assertStatus(status, exp) if (status != XST_SUCCESS){xil_printf("Fail! %s \r\n", exp);return XST_FAILURE;}
 
+#define checkSendSuccess(status)if (status != XST_SUCCESS) {xil_printf("Send Fail!\r\n");return XST_FAILURE;}
+#define logVariable(var,exp){xil_printf("%s : %d 0x%X\r\n", exp,var,var);}
 
 void printBuffer(u8* buffer, char* exp);
 void printStatus(char* message, int status);

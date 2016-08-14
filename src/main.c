@@ -15,6 +15,7 @@
 #include "Utilities/Util.h"
 #include "DeviceControllers/IntrController.h"
 #include "DeviceControllers/BramController.h"
+#include "DeviceControllers/LcdController.h"
 #include "Bluetooth.h"
 
 /*** Devices *****************************************************/
@@ -35,27 +36,26 @@ int main()
 	/***************************************************************/
 	int Status;
 	init_platform();
-	xil_printf("%c[2J", 27);
+	//xil_printf("%c[2J", 27);
 	/***************************************************************/
 	//Input Output Devices
 	/***************************************************************/
 	Status = initLed();
-	checkStatus(Status);
+	assertStatus(Status,"LED initialization was unsuccesful.");
 	Status =initSwitch();
-	checkStatus(Status);
+	assertStatus(Status,"8 bit Switch initialization was unsuccesful.");
 	/***************************************************************/
 	//Bram Controller
 	/***************************************************************/
-	brc_selfTestBramController();
+	//brc_selfTestBramController();
 
 	//brc_selfTestBramController('A');
 	//brc_selfTestBramController('B');
 	/***************************************************************/
 	//UartLite
 	/***************************************************************/
-	xil_printf("Uart Status : 0x%X\r\n", Status);
-	Status = initUartController(&uartCtr_1,XPAR_AXI_UARTLITE_1_DEVICE_ID );
-	xil_printf("Uart_1 Status : 0x%X\r\n", Status);
+	Status = lcd_init(XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	assertStatus(Status,"LCD Uart initialization was unsuccesful.");
 	/***************************************************************/
 	//Bluetooth
 	/***************************************************************/
@@ -68,49 +68,54 @@ int main()
 	connectInterrupts(bt_getPtr(),XPAR_INTC_0_UARTLITE_0_VEC_ID,(XInterruptHandler)XUartLite_InterruptHandler);
 	startIntrController();
 	enableIntrController();
-	checkStatus(Status);
+	assertStatus(Status,"Interrupt controller initialization was unsuccesful.");
 	microblaze_enable_interrupts();
 	/***************************************************************/
 	//Setup Uart Intr Handlers
 	/***************************************************************/
 	bt_setUpIntr();
-	bt_start(1);
+	bt_start(16);
 	/***************************************************************/
 
 	XUartLite_DisableInterrupt(&uartCtr_1);
 	brc_init();
 	xil_printf("Entering Main Loop\r\n");
 	u32 oldSwitch = 0x0;
-
 	while (1)
-		{
+	{
+			if (bt_isDataPresent()) {
+				Status = saveUserInput();
+
+				if (Status != XST_NO_DATA) {
+					printStatus("User Input Received. XST_STATUS : ", Status);
+				}
+
+			}
 
 			u32 switchInput = XGpio_DiscreteRead(&GpioInput,1);
 			if(switchInput != 0){
 
-				if(switchInput==128){
-					break;
-				}
 				if(oldSwitch<switchInput){
+					if(switchInput==128){
+						break;
+					}
 					if(switchInput==1){
 						bt_send("This is a test.");
-						//Status = sendString((unsigned char *)"This is a test.",&blueToothUartCtr);
 						checkSendSuccess(Status);
 					}
-					if(switchInput==2){
-						Status = saveUserInput();
-						printStatus("User Input Received. XST_STATUS : ", Status );
-						//printBuffer(RecvBuffer,"Received Buffer");
+					if (switchInput == 2) {
+						printVectorWithName(brc_getStack(),"Bram Stack : ");
 					}
 					if(switchInput==4){
-						brc_selfTestBramController();
+						Vector* bramData = brc_getStack();
+						lcd_setBuffer(bramData);
+						lcd_display();
 					}
 					if(switchInput==8){
-						//printVector(&dataVector);
+						lcd_displayPrevious();
 					}
 					if(switchInput==16){
-						bt_send("AT");
-						checkSendSuccess(Status);
+						lcd_displayNext();
 					}
 					if(switchInput==32){
 
@@ -152,14 +157,13 @@ int main()
 			}
 			oldSwitch = switchInput;
 		}
-	xil_printf("Quitting...\r\n");
+	xil_printf("Program Aborted.\r\n");
 	return 0;
 }
 
 Xuint32 initLed() {
 
 	Xuint32 status = XGpio_Initialize(&GpioOutput, XPAR_LEDS_8BITS_DEVICE_ID);
-	xil_printf("LED Status : %X\r\n", status);
 	if(status == XST_SUCCESS){
 		XGpio_SetDataDirection(&GpioOutput, 1, 0x0);
 	}
@@ -168,7 +172,6 @@ Xuint32 initLed() {
 Xuint32 initSwitch() {
 
 	Xuint32 status = XGpio_Initialize(&GpioInput, XPAR_DIP_SWITCHES_8BITS_DEVICE_ID);
-	xil_printf("8 BITS Switch Status : %X\r\n", status);
 	if(status == XST_SUCCESS){
 		XGpio_SetDataDirection(&GpioInput, 1, 0xFFFFFFFF);
 	}
@@ -178,17 +181,18 @@ Xuint32 initSwitch() {
 u8 saveUserInput(){
 	u8 success = FALSE;
 	u8 status;
-	if (bt_getPacketFlag() == TRUE) {
+	if (bt_isDataPresent() == TRUE) {
 		Vector* btStack = bt_getStack();
 		status = brc_saveStack(btStack);
-		checkStatus(status);
-		bt_setPacketFlag(FALSE);
+		assertStatus(status,"Bram brc_saveStack() failed.")
 		Vector* brStack = brc_getStack();
-		printVectorWithName(btStack, "btVector : ");
-		printVectorWithName(brStack, "brVector : ");
 		Vector* brLastPacket = vector_split(brStack, btStack->count);
 		success = vector_equals(btStack, brLastPacket);
 		vector_destruct(brLastPacket);
+		bt_resetStack();
+		bt_setDataPresent(FALSE);
+	}else{
+		return XST_NO_DATA;
 	}
 	if (success) {
 		return XST_SUCCESS;

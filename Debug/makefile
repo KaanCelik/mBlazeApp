@@ -27,38 +27,38 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 ELFSIZE += \
-FirstProject.elf.size \
+ITU_uBlaze.elf.size \
 
 ELFCHECK += \
-FirstProject.elf.elfcheck \
+ITU_uBlaze.elf.elfcheck \
 
 
 # All Target
-all: FirstProject.elf secondary-outputs
+all: ITU_uBlaze.elf secondary-outputs
 
 # Tool invocations
-FirstProject.elf: $(OBJS) ../src/lscript.ld $(USER_OBJS)
+ITU_uBlaze.elf: $(OBJS) ../src/lscript.ld $(USER_OBJS)
 	@echo Building target: $@
 	@echo Invoking: MicroBlaze gcc linker
-	mb-gcc -Wl,--no-relax -Wl,-T -Wl,../src/lscript.ld -L../../mBlaze_v1.2.1_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mcpu=v8.40.a -mno-xl-soft-mul -o"FirstProject.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	mb-gcc -Wl,--no-relax -Wl,-T -Wl,../src/lscript.ld -L../../mBlaze_v1.3_bsp/microblaze_0/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mcpu=v8.40.a -mno-xl-soft-mul -o"ITU_uBlaze.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo Finished building target: $@
 	@echo ' '
 
-FirstProject.elf.size: FirstProject.elf
+ITU_uBlaze.elf.size: ITU_uBlaze.elf
 	@echo Invoking: MicroBlaze Print Size
-	mb-size FirstProject.elf  |tee "FirstProject.elf.size"
+	mb-size ITU_uBlaze.elf  |tee "ITU_uBlaze.elf.size"
 	@echo Finished building: $@
 	@echo ' '
 
-FirstProject.elf.elfcheck: FirstProject.elf
+ITU_uBlaze.elf.elfcheck: ITU_uBlaze.elf
 	@echo Invoking: Xilinx ELF Check
-	elfcheck FirstProject.elf -hw ../../mBlaze2_hw_platform/system.xml -pe microblaze_0  |tee "FirstProject.elf.elfcheck"
+	elfcheck ITU_uBlaze.elf -hw ../../mBlaze2_hw_platform/system.xml -pe microblaze_0  |tee "ITU_uBlaze.elf.elfcheck"
 	@echo Finished building: $@
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES)$(ELFSIZE)$(ELFCHECK)$(S_UPPER_DEPS) FirstProject.elf
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES)$(ELFSIZE)$(ELFCHECK)$(S_UPPER_DEPS) ITU_uBlaze.elf
 	-@echo ' '
 
 secondary-outputs: $(ELFSIZE) $(ELFCHECK)

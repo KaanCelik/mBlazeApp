@@ -25,6 +25,7 @@ u8* vector_getElement(Vector*, int);
 void vector_delete(Vector*, int);
 void vector_free(Vector*);
 void vector_appendArray(Vector* v, u8* buffer, int size);
+void vector_append(Vector* dest, Vector* src);
 Vector* vector_split(Vector * v, int index);
 u8 vector_equals(Vector * v1, Vector * v2);
 void printVector(Vector * v);

@@ -75,6 +75,14 @@ void vector_appendArray(Vector* v, u8* buffer, int size) {
 		vector_push(v, c);
 	}
 }
+void vector_append(Vector* dest, Vector* src) {
+	int x = 0;
+	for (x = 0; x < src->count; x++) {
+		u8 c = src->data[x];
+		vector_push(dest, c);
+	}
+}
+
 void printVector(Vector * v) {
 	xil_printf("Vector : \r\n");
 	int i;
@@ -98,7 +106,7 @@ u8 vector_equals(Vector * v1, Vector * v2) {
 	} else {
 		int i;
 		for (i = 0; i < v1->count; i++) {
-			if (vector_getElement(v1, i) != vector_getElement(v2, i)) {
+			if (*vector_getElement(v1, i) != *vector_getElement(v2, i)) {
 				result = FALSE;
 				break;
 			}
