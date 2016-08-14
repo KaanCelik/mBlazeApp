@@ -18,12 +18,7 @@
 #define DISPLAY_MATRIX_ROW  2
 #define DISPLAY_MATRIX_COL  16
 
-enum DISPLAY_MODES
-        {
-          HEX,
-          DECIMAL,
-          CHAR
-        };
+
 
 
 u32 lcd_init(u32 deviceId);

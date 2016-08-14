@@ -9,7 +9,6 @@
 
 XUartLite lcdUart;
 Vector lcdBuffer;
-Vector displayVector;
 u8 currentDisplayMode;
 char* rows[DISPLAY_MATRIX_ROW];
 const char escSeq[3] = {0x1B,'[', '\0'};
@@ -23,29 +22,12 @@ u32 lcd_init(u32 deviceId){
 	return status;
 }
 
-void decodeData(char* dest, u8 src) {
-	switch (currentDisplayMode) {
-	case HEX:
-		sprintf(dest, "0x%X", src);
-		break;
-	case CHAR:
-		sprintf(dest, "%s", (char *) &src);
-		break;
-	case DECIMAL:
-		sprintf(dest, "%u", src);
-		break;
-	default:
-		sprintf(dest, "0x%X", src);
-		break;
-	}
-
-}
 void calculateDisplayMatrix(){
 
 	int i,r=0;
 	for (i = 0; i < lcdBuffer.count; i++) {
 		char* tempStr = "";
-		decodeData(tempStr, *vector_getElement(&lcdBuffer, i));
+		//decodeData(tempStr, *vector_getElement(&lcdBuffer, i));
 		if((strlen(tempStr)+strlen(rows[r]))>=DISPLAY_MATRIX_COL){
 			break;
 		}
