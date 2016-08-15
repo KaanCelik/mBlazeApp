@@ -27,33 +27,43 @@ LINK=gcc
 CFLAGS= -I$(PATHU) -I$(PATHSC) -I$(PATH_BSP)
 #Recipes
 
-test : build link run $(PATHR)TestLcdDecorator.txt
-	tail -10 $(PATHR)TestLcdDecorator.txt
+test : $(PATHR)TestLcdDecorator.txt
+	@echo -e "-----------------------\nIGNORES:\n-----------------------"
+	@echo -e `grep -s IGNORE $(PATHR)TestLcdDecorator.txt`
+	@echo -e "-----------------------\nFAILURES:\n-----------------------"
+	@echo -e `grep -s FAIL $(PATHR)TestLcdDecorator.txt`
+	@echo -e "-----------------------"
+	@echo -e "\nDONE"
+	@echo -e "-----------------------"
 
 
-run : $(PATHBIN)TestLcdDecorator.exe
+$(PATHR)TestLcdDecorator.txt : $(PATHBIN)TestLcdDecorator.exe
 	-./$< > $(PATHR)TestLcdDecorator.txt 2>&1
 
-build : $(PATHOBJ)TestLcdDecorator.d $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o
-	@echo $(PATHOBJ)TestLcdDecorator.d created.
-	@echo $(PATHOBJ)TestLcdDecorator.o created. 
-	@echo $(PATHOBJ)LcdDecorator.o created. 
+$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)unity.o
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"  
+	gcc   -o $(PATHBIN)TestLcdDecorator.exe  $^
+	@echo -e "-----------------------"
 
-$(PATHOBJ)TestLcdDecorator.d :: $(PATHT)TestLcdDecorator.c 
-	$(DEPEND) $@ $<
-	@echo \n
-	
-$(PATHOBJ)TestLcdDecorator.o : $(PATHT)TestLcdDecorator.c  
+$(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"  
 	gcc -c $(CFLAGS) $(PATHT)TestLcdDecorator.c  -o $@ 
-	@echo \n
+	@echo -e "-----------------------"
+
+$(PATHOBJ)TestLcdDecorator.d : $(PATHT)TestLcdDecorator.c 
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"
+	$(DEPEND) $@ $<
+	@echo -e "-----------------------"
+	
 
 $(PATHOBJ)LcdDecorator.o : $(PATHSC)LcdDecorator.c
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"
 	gcc -c $(CFLAGS) $<  -o $@ 
-
-
-link : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)unity.o  
-	gcc   -o $(PATHBIN)TestLcdDecorator.exe  $^
-	
+	@echo -e "-----------------------"
 
 clean :
 	$(CLEANUP) $(PATHOBJ)*.o
