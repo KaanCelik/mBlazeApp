@@ -34,6 +34,6 @@ typedef struct LcdConfig {
  * @return 	A string value of the given data.
  * @note	Caller must initialize the LcdConfig before passing the pointer.
  */
-char* lcd_decode(LcdConfig* configPtr, u8 inputData);
+void lcd_decode(LcdConfig* configPtr, u8* inputData, char* dest);
 
 #endif /* LCDDECORATOR_H_ */

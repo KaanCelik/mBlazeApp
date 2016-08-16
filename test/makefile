@@ -1,13 +1,13 @@
 ifeq ($(OSTYPE),cygwin)
-	CLEANUP=rm -f
+	CLEANUP=rm -rf
 	MKDIR=mkdir -p
 	TARGET_EXTENSION=out
 else ifeq ($(OS),Windows_NT)
-	CLEANUP=rm -f
+	CLEANUP=rm -rf
 	MKDIR=mkdir
 	TARGET_EXTENSION=exe
 else
-	CLEANUP=rm -f
+	CLEANUP=rm -rf
 	MKDIR=mkdir -p
 	TARGET_EXTENSION=out
 endif
@@ -18,16 +18,21 @@ PATHOBJ=build/obj/
 PATHBIN=build/bin/
 PATHR=build/report/
 #Includes
-PATHU=../../unity/src/
+PATHU=../lib/unity/
 PATHSC=../src/DeviceControllers/
 PATH_BSP = ../../mBlaze_v1.3_bsp/microblaze_0/include/
 #Commands
 DEPEND=gcc -MM -MG -MF
 LINK=gcc
 CFLAGS= -I$(PATHU) -I$(PATHSC) -I$(PATH_BSP)
+COMPILE=gcc -c
+LIBRARY=../lib/
+
 #Recipes
 
-test : $(PATHR)TestLcdDecorator.txt
+
+test : $(PATHBIN)TestLcdDecorator.exe
+	@-./$< > $(PATHR)TestLcdDecorator.txt 2>&1
 	@echo -e "-----------------------\nIGNORES:\n-----------------------"
 	@echo -e `grep -s IGNORE $(PATHR)TestLcdDecorator.txt`
 	@echo -e "-----------------------\nFAILURES:\n-----------------------"
@@ -37,38 +42,42 @@ test : $(PATHR)TestLcdDecorator.txt
 	@echo -e "-----------------------"
 
 
-$(PATHR)TestLcdDecorator.txt : $(PATHBIN)TestLcdDecorator.exe
-	-./$< > $(PATHR)TestLcdDecorator.txt 2>&1
-
-$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)unity.o
+$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)build/unity.o
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
-	gcc   -o $(PATHBIN)TestLcdDecorator.exe  $^
+	@gcc   -o $(PATHBIN)TestLcdDecorator.exe  $^
 	@echo -e "-----------------------"
 
 $(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
-	gcc -c $(CFLAGS) $(PATHT)TestLcdDecorator.c  -o $@ 
+	@gcc -c $(CFLAGS) $(PATHT)TestLcdDecorator.c  -o $@ 
 	@echo -e "-----------------------"
 
 $(PATHOBJ)TestLcdDecorator.d : $(PATHT)TestLcdDecorator.c 
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"
-	$(DEPEND) $@ $<
+	@$(DEPEND) $@ $<
 	@echo -e "-----------------------"
 	
 
 $(PATHOBJ)LcdDecorator.o : $(PATHSC)LcdDecorator.c
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"
-	gcc -c $(CFLAGS) $<  -o $@ 
+	@gcc -c $(CFLAGS) $<  -o $@ 
 	@echo -e "-----------------------"
 
+$(LIBRARY)unity/build/%.o : $(LIBRARY)unity/%.c
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"
+	@$(COMPILE) $< -o $@  
+	@echo -e "-----------------------"
+	
 clean :
 	$(CLEANUP) $(PATHOBJ)*.o
 	$(CLEANUP) $(PATHOBJ)*.d
 	$(CLEANUP) $(PATHBIN)*.exe
-	
+	$(CLEANUP) $(PATHR)*.txt
+	$(CLEANUP) $(LIBRARY)*/build/*.o 
 
 	

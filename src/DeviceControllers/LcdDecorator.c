@@ -7,21 +7,21 @@
 #include "LcdDecorator.h"
 #include <stdio.h>
 
-char* lcd_decode(LcdConfig* configPtr, u8 inputData){
-	char * result= NULL;
+void lcd_decode(LcdConfig* configPtr, u8* inputData, char* dest){
+
 	switch (configPtr->displayMode) {
 	case HEX:
-		sprintf(result, "0x%X", inputData);
+		sprintf(dest, "0x%X", *inputData);
 		break;
 	case CHAR:
-		sprintf(result, "%s", (char *) &inputData);
+		sprintf(dest, "%s", (char *) inputData);
 		break;
 	case DECIMAL:
-		sprintf(result, "%u", inputData);
+		sprintf(dest, "%u", *inputData);
 		break;
 	default:
-		sprintf(result, "0x%X", inputData);
+		sprintf(dest, "0x%X", *inputData);
 		break;
 	}
-	return result;
+
 }
