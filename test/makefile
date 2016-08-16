@@ -17,28 +17,33 @@ PATHSO=../Debug/src/DeviceControllers/
 PATHOBJ=build/obj/
 PATHBIN=build/bin/
 PATHR=build/report/
+PATHB=build/
 #Includes
+LIBRARY=../lib/
 PATHU=../lib/unity/
 PATHSC=../src/DeviceControllers/
 PATH_BSP = ../../mBlaze_v1.3_bsp/microblaze_0/include/
 #Commands
 DEPEND=gcc -MM -MG -MF
 LINK=gcc
-CFLAGS= -I$(PATHU) -I$(PATHSC) -I$(PATH_BSP)
-COMPILE=gcc -c
-LIBRARY=../lib/
 
+COMPILE=gcc -c
+CFLAGS= -I$(PATHU) -I$(PATHSC) -I$(PATH_BSP) -I$(LIBRARY)
+
+
+BUILD_PATHS= $(PATHB) $(PATHOBJ) $(PATHBIN) $(PATHR)
 #Recipes
 
-
-test : $(PATHBIN)TestLcdDecorator.exe
-	@-./$< > $(PATHR)TestLcdDecorator.txt 2>&1
+test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
+	@-./$(PATHBIN)TestLcdDecorator.exe > $(PATHR)TestLcdDecorator.txt 2>&1
+	@echo -e "-----------------------\nSUMMARY\n------------------------"
+	@echo -e `grep -s Tests $(PATHR)TestLcdDecorator.txt`
 	@echo -e "-----------------------\nIGNORES:\n-----------------------"
 	@echo -e `grep -s IGNORE $(PATHR)TestLcdDecorator.txt`
 	@echo -e "-----------------------\nFAILURES:\n-----------------------"
 	@echo -e `grep -s FAIL $(PATHR)TestLcdDecorator.txt`
 	@echo -e "-----------------------"
-	@echo -e "\nDONE"
+	@echo -e "DONE"
 	@echo -e "-----------------------"
 
 
@@ -72,7 +77,19 @@ $(LIBRARY)unity/build/%.o : $(LIBRARY)unity/%.c
 	@echo -e "Target : $@"
 	@$(COMPILE) $< -o $@  
 	@echo -e "-----------------------"
-	
+
+$(PATHB):
+	mkdir $@
+
+$(PATHOBJ):
+	mkdir $@
+
+$(PATHBIN):
+	mkdir $@
+
+$(PATHR):
+	mkdir $@
+
 clean :
 	$(CLEANUP) $(PATHOBJ)*.o
 	$(CLEANUP) $(PATHOBJ)*.d
