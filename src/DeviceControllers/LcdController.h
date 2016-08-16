@@ -9,14 +9,7 @@
 #define LCDCONTROLLER_H_
 #include "UartController.h"
 #include "../Utilities/Vector.h"
-/**
- * LCD display constraints. Must be defined in accordance with the
- * device being used.
- * DISPLAY_MATRIX_ROW is the amount of rows of the display.
- * DISPLAY_MATRIX_COL is the amount of columns of the display.
- */
-#define DISPLAY_MATRIX_ROW  2
-#define DISPLAY_MATRIX_COL  16
+
 
 
 
@@ -54,17 +47,7 @@ u32 lcd_displayNext();
  */
 u32 lcd_displayPrevious();
 
-/**
- * Changes the representation of the data, recalculates display vector.
- *
- * @param 	dispMode is the mode of representation. It can be one of the
- * values in DISPLAY_MODES enum.
- *
- * @return	- XST_SUCCESS
- * 			- XST_INVALID_PARAM if input display mode is not valid.
- * 			- XST_FAILURE if there is a error.
- */
-u32 lcd_changeDisplayMode();
+
 
 /**
  * Sets the display buffer. It represents the raw data to be displayed.

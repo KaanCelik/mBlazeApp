@@ -7,9 +7,40 @@
 #include "LcdDecorator.h"
 #include <stdio.h>
 
-void lcd_decode(LcdConfig* configPtr, u8 inputData, char* resultStr){
+LcdConfig config;
+char* displayMatrix[20];
+
+
+LcdConfig* getLcdConfigPtr(){
+	return &config;
+}
+
+
+char** getDisplayMatrixPtr(){
+	return (char**) displayMatrix;
+}
+
+void calculateDisplayMatrix(Vector* byteVector){
+/*
+	int i,r=0;
+	for (i = 0; i < byteVector->count; i++) {
+		char tempStr[6];
+
+		lcd_decode(*(vector_getElement(byteVector, i)) , tempStr);
+		if((strlen(tempStr)+strlen(&displayMatrix[r]))>=DISPLAY_MATRIX_COL){
+			r++;
+			i--;
+			continue;
+		}
+		strncat(&displayMatrix[r],tempStr,strlen(tempStr));
+	}
+	*/
+}
+
+
+void lcd_decode(u8 inputData, char* resultStr){
 	
-	switch (configPtr->displayMode) {
+	switch (config.displayMode) {
 	case HEX:
 		sprintf(resultStr, "0x%X", inputData);
 		break;
@@ -24,4 +55,8 @@ void lcd_decode(LcdConfig* configPtr, u8 inputData, char* resultStr){
 		break;
 	
 	}
+}
+
+char* getRow(int i){
+	return (char*) displayMatrix[i];
 }

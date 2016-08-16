@@ -21,14 +21,15 @@ PATHB=build/
 #Includes
 LIBRARY=../lib/
 PATHU=../lib/unity/
-PATHSC=../src/DeviceControllers/
+PATH_DVCC=../src/DeviceControllers/
+PATH_VEC=../src/Utilities/
 PATH_BSP = ../../mBlaze_v1.3_bsp/microblaze_0/include/
 #Commands
 DEPEND=gcc -MM -MG -MF
 LINK=gcc
 
-COMPILE=gcc -c
-CFLAGS= -I$(PATHU) -I$(PATHSC) -I$(PATH_BSP) -I$(LIBRARY)
+COMPILE=gcc -Wall -c 
+CFLAGS= -I$(PATHU) -I$(PATH_DVCC) -I$(PATH_BSP) -I$(LIBRARY) -I$(PATH_VEC)
 
 
 BUILD_PATHS= $(PATHB) $(PATHOBJ) $(PATHBIN) $(PATHR)
@@ -47,10 +48,10 @@ test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
 	@echo -e "-----------------------"
 
 
-$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)build/unity.o
+$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
-	@gcc   -o $(PATHBIN)TestLcdDecorator.exe  $^
+	@gcc  $(CFLAGS) -o $(PATHBIN)TestLcdDecorator.exe  $^
 	@echo -e "-----------------------"
 
 $(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
@@ -66,7 +67,7 @@ $(PATHOBJ)TestLcdDecorator.d : $(PATHT)TestLcdDecorator.c
 	@echo -e "-----------------------"
 	
 
-$(PATHOBJ)LcdDecorator.o : $(PATHSC)LcdDecorator.c
+$(PATHOBJ)LcdDecorator.o : $(PATH_DVCC)LcdDecorator.c 
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"
 	@gcc -c $(CFLAGS) $<  -o $@ 
@@ -76,6 +77,12 @@ $(LIBRARY)unity/build/%.o : $(LIBRARY)unity/%.c
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"
 	@$(COMPILE) $< -o $@  
+	@echo -e "-----------------------"
+
+$(PATH_VEC)Vector.o: $(PATH_VEC)Vector.c
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"
+	@$(COMPILE) $(CFLAGS) $< -o $@  
 	@echo -e "-----------------------"
 
 $(PATHB):

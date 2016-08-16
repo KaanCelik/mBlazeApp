@@ -7,7 +7,7 @@
 
 #ifndef VECTOR_H_
 #define VECTOR_H_
-#include "xbasic_types.h"
+#include <xil_types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

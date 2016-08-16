@@ -84,19 +84,19 @@ void vector_append(Vector* dest, Vector* src) {
 }
 
 void printVector(Vector * v) {
-	xil_printf("Vector : \r\n");
+	//xil_printf("Vector : \r\n");
 	int i;
 
 	for (i = 0; i < vector_count(v); i++) {
-		xil_printf("v[%d]: %c\n", i, *(vector_getElement(v, i)));
+		//xil_printf("v[%d]: %c\n", i, *(vector_getElement(v, i)));
 	}
 }
 void printVectorWithName(Vector * v, char* vName) {
-	xil_printf("%s\r\n",vName);
+	//xil_printf("%s\r\n",vName);
 	int i;
 
 	for (i = 0; i < vector_count(v); i++) {
-		xil_printf("v[%d]: %c\n", i, *(vector_getElement(v, i)));
+		//xil_printf("v[%d]: %c\n", i, *(vector_getElement(v, i)));
 	}
 }
 u8 vector_equals(Vector * v1, Vector * v2) {
