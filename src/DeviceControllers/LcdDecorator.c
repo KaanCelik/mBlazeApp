@@ -7,21 +7,56 @@
 #include "LcdDecorator.h"
 #include <stdio.h>
 
-char* lcd_decode(LcdConfig* configPtr, u8 inputData){
-	char * result= NULL;
-	switch (configPtr->displayMode) {
+LcdConfig config;
+char* displayMatrix[20];
+
+
+LcdConfig* getLcdConfigPtr(){
+	return &config;
+}
+
+
+char** getDisplayMatrixPtr(){
+	return (char**) displayMatrix;
+}
+
+void calculateDisplayMatrix(Vector* byteVector){
+/*
+	int i,r=0;
+	for (i = 0; i < byteVector->count; i++) {
+		char tempStr[6];
+
+		lcd_decode(*(vector_getElement(byteVector, i)) , tempStr);
+		if((strlen(tempStr)+strlen(&displayMatrix[r]))>=DISPLAY_MATRIX_COL){
+			r++;
+			i--;
+			continue;
+		}
+		strncat(&displayMatrix[r],tempStr,strlen(tempStr));
+	}
+	*/
+}
+
+
+void lcd_decode(u8 inputData, char* resultStr){
+	
+	switch (config.displayMode) {
 	case HEX:
-		sprintf(result, "0x%X", inputData);
-		break;
-	case CHAR:
-		sprintf(result, "%s", (char *) &inputData);
+		sprintf(resultStr, "0x%X", inputData);
 		break;
 	case DECIMAL:
-		sprintf(result, "%u", inputData);
+		sprintf(resultStr, "%u", inputData);
+		break;
+	case CHAR:
+		sprintf(resultStr, "%s", (char *) &inputData);
 		break;
 	default:
-		sprintf(result, "0x%X", inputData);
+		sprintf(resultStr, "0x%X", inputData);
 		break;
+	
 	}
-	return result;
+}
+
+char* getRow(int i){
+	return (char*) displayMatrix[i];
 }
