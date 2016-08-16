@@ -8,8 +8,23 @@
 #include <stdio.h>
 
 LcdConfig config;
-char* displayMatrix[20];
+char* stringPtrArray[DISPLAY_MATRIX_COL];
+u16	displayTableRowCount = 0;
 
+void construct(){
+	int i = 0;
+	for(i=0;i<DISPLAY_MATRIX_ROW_MAX; i++){
+		stringPtrArray[i] = malloc(sizeof(char*));
+		displayTableRowCount++;
+	}
+}
+void destruct(){
+	int i = 0;
+	for (i = 0; i < DISPLAY_MATRIX_ROW_MAX; i++) {
+		free(stringPtrArray[i]);
+		displayTableRowCount--;
+	}
+}
 
 LcdConfig* getLcdConfigPtr(){
 	return &config;
@@ -17,7 +32,7 @@ LcdConfig* getLcdConfigPtr(){
 
 
 char** getDisplayMatrixPtr(){
-	return (char**) displayMatrix;
+	return (char**) stringPtrArray;
 }
 
 void calculateDisplayMatrix(Vector* byteVector){
@@ -57,6 +72,23 @@ void lcd_decode(u8 inputData, char* resultStr){
 	}
 }
 
+void changeDisplayMode(int dispMode){
+	switch (dispMode) {
+	case HEX:
+		config.displayMode = HEX;
+		break;
+	case DECIMAL:
+		config.displayMode = DECIMAL;
+		break;
+	case CHAR:
+		config.displayMode = CHAR;
+		break;
+	default:
+		config.displayMode = HEX;
+		break;
+	}
+}
+
 char* getRow(int i){
-	return (char*) displayMatrix[i];
+	return &(stringPtrArray[i]);
 }

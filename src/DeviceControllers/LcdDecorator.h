@@ -18,7 +18,7 @@
  */
 #define DISPLAY_MATRIX_ROW  2
 #define DISPLAY_MATRIX_COL  16
-
+#define DISPLAY_MATRIX_ROW_MAX  32
 enum DISPLAY_MODES
         {
           HEX,
@@ -32,6 +32,8 @@ typedef struct LcdConfig {
 	u16 displayMode;
 }LcdConfig;
 
+void construct();
+void destruct();
 char* getRow(int i);
 LcdConfig* getLcdConfigPtr();
 char** getDisplayMatrixPtr();
@@ -73,6 +75,6 @@ void lcd_decode(u8 inputData, char* resultStr);
  * 			- XST_INVALID_PARAM if input display mode is not valid.
  * 			- XST_FAILURE if there is a error.
  */
-u32 lcd_changeDisplayMode();
+void changeDisplayMode(int dispMode);
 
 #endif /* LCDDECORATOR_H_ */
