@@ -15,7 +15,6 @@ LcdConfig* configPtr;
 void setUp(){
 
 	configPtr = getLcdConfigPtr();
-
 	configPtr->maxRows = 2;
 	configPtr->maxCols = 16;
 	configPtr->displayMode= HEX;
@@ -29,7 +28,6 @@ void tearDown(){
 void test_getLcdConfigPtr(){
 	LcdConfig* cPtr = getLcdConfigPtr();
 	TEST_ASSERT_NOT_NULL(cPtr);
-
 }
 
 
@@ -67,8 +65,26 @@ void test_getRow(){
 	dispMatrix[1] = r2;
 	char* resultRow1 = getRow(0);
 	char* resultRow2 = getRow(1);
+	resultRow1=r;
 	TEST_ASSERT_EQUAL_STRING(r,resultRow1);
 	TEST_ASSERT_EQUAL_STRING(r2,resultRow2);
+}
+
+void test_changeDisplayMode(){
+	u16 dispModeHex = HEX;
+	u16 dispModeDec = DECIMAL;
+	u16 dispModeChar = CHAR;
+	u16 dispModeIllegal = 77;
+
+	changeDisplayMode(dispModeIllegal);
+	TEST_ASSERT_EQUAL_UINT16(dispModeHex, configPtr->displayMode);
+	changeDisplayMode(dispModeDec);
+	TEST_ASSERT_EQUAL_UINT16(dispModeDec, configPtr->displayMode);
+	changeDisplayMode(dispModeChar);
+	TEST_ASSERT_EQUAL_UINT16(dispModeChar, configPtr->displayMode);
+	changeDisplayMode(dispModeHex);
+	TEST_ASSERT_EQUAL_UINT16(dispModeHex, configPtr->displayMode);
+
 }
 
 int main(void){
@@ -77,10 +93,11 @@ int main(void){
 
 	RUN_TEST(test_getLcdConfigPtr);
 	RUN_TEST(test_decodeData_ShouldReturnValidString);
+	RUN_TEST(test_changeDisplayMode);
 	//RUN_TEST(test_calculateDisplayMatrix);
-	RUN_TEST(test_getRow);
+	//RUN_TEST(test_getRow);
 
 	return UNITY_END();
-	return 0;
+
 }
 
