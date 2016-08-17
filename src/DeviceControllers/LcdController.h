@@ -52,8 +52,25 @@ u32 lcd_displayPrevious();
 /**
  * Sets the display buffer. It represents the raw data to be displayed.
  *
- * @param 	bfVector is the raw input to be displayed. It can have u8 numbers.
+ * @param 	byteVector is the raw input to be displayed. It can have u8 numbers.
  */
-void lcd_setBuffer(Vector* bfVector);
+void lcd_setBuffer(Vector* byteVector);
 
+
+/**
+ * Displays the selected rows by sending the proper commands via
+ * uart to the device.By default it moves the cursor to the beginning
+ * and then puts the rows to display.Caller must call calculateDisplayMatrix()
+ * method prior to this method.
+ *
+ *
+ * @param 	rowIndexes is a array of integers. Specifies which exact rows
+ * 			must be displayed.
+ * @param 	len is the length of rowIndexes. Caller must specify it.
+ * 			This parameter cannot exceed DISPLAY_MATRIX_ROW.
+ *
+ * @return	- XST_SUCCESS
+ * 			- XST_FAILURE
+ */
+u32 displayRows(u16* rowIndexes, int len)
 #endif /* LCDCONTROLLER_H_ */

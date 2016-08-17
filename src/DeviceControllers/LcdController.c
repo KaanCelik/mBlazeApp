@@ -5,49 +5,28 @@
  *      Author: KaaN
  */
 #include "LcdController.h"
-#include "UartController.h"
+#include "StringArray.h"
 
 XUartLite lcdUart;
-Vector lcdBuffer;
-u8 currentDisplayMode;
+StringArray* lcdStrTablePtr;
 
 const char escSeq[3] = {0x1B,'[', '\0'};
 u16* currDisplayedRows;
 
-
 u32 lcd_init(u32 deviceId){
 	u32 status;
 	status = initUartController(&lcdUart,deviceId );
-
 	return status;
+	//construct(&lcdBuffer);
 }
 
 
-
-
-
-void lcd_setBuffer(Vector* bfVector){
-	vector_init(&lcdBuffer);
-	vector_append(&lcdBuffer , bfVector);
-	calculateDisplayMatrix();
+void lcd_setBuffer(Vector* byteVector){
+	calculateDisplayMatrix(Vector* byteVector);
+	lcdStrTablePtr = getLcdStringArray();
 }
 
-/**
- * Displays the selected rows by sending the proper commands via
- * uart to the device.By default it moves the cursor to the beginning
- * and then puts the rows to display.Caller must call calculateDisplayMatrix()
- * method prior to this method.
- *
- *
- * @param 	rowIndexes is a array of integers. Specifies which exact rows
- * 			must be displayed.
- * @param 	len is the length of rowIndexes. Caller must specify it.
- * 			This parameter cannot exceed DISPLAY_MATRIX_ROW.
- *
- * @return	- XST_SUCCESS
- * 			- XST_FAILURE
- * @note
- */
+
 u32 displayRows(u16* rowIndexes, int len){
 
 	if(len>DISPLAY_MATRIX_ROW){
