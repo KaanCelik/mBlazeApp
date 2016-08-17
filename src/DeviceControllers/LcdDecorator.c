@@ -89,6 +89,4 @@ void changeDisplayMode(int dispMode){
 	}
 }
 
-char* getRow(int i){
-	return &(stringPtrArray[i]);
-}
+

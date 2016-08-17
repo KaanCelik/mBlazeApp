@@ -57,18 +57,7 @@ void test_calculateDisplayMatrix(){
 
 }
 
-void test_getRow(){
-	char** dispMatrix = getDisplayMatrixPtr();
-	char* r = "aaaa";
-	char* r2 = "bbbb";
-	dispMatrix[0] = r;
-	dispMatrix[1] = r2;
-	char* resultRow1 = getRow(0);
-	char* resultRow2 = getRow(1);
-	resultRow1=r;
-	TEST_ASSERT_EQUAL_STRING(r,resultRow1);
-	TEST_ASSERT_EQUAL_STRING(r2,resultRow2);
-}
+
 
 void test_changeDisplayMode(){
 	u16 dispModeHex = HEX;

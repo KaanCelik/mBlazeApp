@@ -33,7 +33,12 @@ CFLAGS= -I$(PATHU) -I$(PATH_DVCC) -I$(PATH_BSP) -I$(LIBRARY) -I$(PATH_VEC)
 
 
 BUILD_PATHS= $(PATHB) $(PATHOBJ) $(PATHBIN) $(PATHR)
+
+EXES=$(PATHBIN)TestLcdDecorator.exe $(PATHBIN)TestLcdController.exe
 #Recipes
+
+all : $(EXES)
+
 
 test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
 	@-./$(PATHBIN)TestLcdDecorator.exe > $(PATHR)TestLcdDecorator.txt 2>&1
@@ -48,10 +53,16 @@ test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
 	@echo -e "-----------------------"
 
 
-$(PATHBIN)TestLcdDecorator.exe : $(PATHOBJ)TestLcdDecorator.o $(PATHOBJ)LcdDecorator.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
+$(PATHBIN)Test%.exe : $(PATHOBJ)Test%.o $(PATHOBJ)%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
 	@gcc  $(CFLAGS) -o $(PATHBIN)TestLcdDecorator.exe  $^
+	@echo -e "-----------------------"
+
+$(PATHBIN)%.exe : build/obj/%.o build/obj/%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
+	@echo -e "-----------------------"
+	@echo -e "Target : $@"  
+	@gcc  $(CFLAGS) -o $@  $^
 	@echo -e "-----------------------"
 
 $(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
