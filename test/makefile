@@ -1,118 +1,70 @@
-ifeq ($(OSTYPE),cygwin)
-	CLEANUP=rm -rf
-	MKDIR=mkdir -p
-	TARGET_EXTENSION=out
-else ifeq ($(OS),Windows_NT)
-	CLEANUP=rm -rf
-	MKDIR=mkdir
-	TARGET_EXTENSION=exe
-else
-	CLEANUP=rm -rf
-	MKDIR=mkdir -p
-	TARGET_EXTENSION=out
-endif
-#Include Directories
-PATHT=src/
-PATHSO=../Debug/src/DeviceControllers/
-PATHOBJ=build/obj/
-PATHBIN=build/bin/
-PATHR=build/report/
-PATHB=build/
-#Includes
-LIBRARY=../lib/
-PATHU=../lib/unity/
-PATH_DVCC=../src/DeviceControllers/
-PATH_VEC=../src/Utilities/
-PATH_BSP = ../../mBlaze_v1.3_bsp/microblaze_0/include/
-#Commands
-DEPEND=gcc -MM -MG -MF
-LINK=gcc
+# this is a comment
+CC=gcc
 
-COMPILE=gcc -Wall -c 
-CFLAGS= -I$(PATHU) -I$(PATH_DVCC) -I$(PATH_BSP) -I$(LIBRARY) -I$(PATH_VEC)
+##########################################################################
+## Includes +
+##########################################################################
+LIB_INCLUDE:= $(shell  ls -d ../lib/*/ ../lib/)
+SRC_INCLUDE:= $(shell  ls -d ../src/*/ ../src/)
+BSP_INCLUDE:= ../../mBlaze_v1.3_bsp/microblaze_0/include/
+INCLUDES= $(subst lib,-Ilib,$(LIB_INCLUDE)) $(subst src,-Isrc,$(SRC_INCLUDE)) -I$(BSP_INCLUDE) 
+##########################################################################
+## Commands +
+##########################################################################
+DEPEND:=gcc -MM -MG -MF
 
+##########################################################################
+## Functions
+##########################################################################
 
-BUILD_PATHS= $(PATHB) $(PATHOBJ) $(PATHBIN) $(PATHR)
-
-EXES=$(PATHBIN)TestLcdDecorator.exe $(PATHBIN)TestLcdController.exe
-#Recipes
-
-all : $(EXES)
+##########################################################################
+## Variables
+##########################################################################
+#MAINSRC := $(shell ls src/*.c src/*/*.c)
+#MAINOBJ := $(foreach dir,$(MAINSRC),$(subst .c,.o,test/build/obj/$(shell basename $(dir))))
+#TESTSRC := $(shell ls test/src/*.c)
+#TEMPOBJ := $(subst test/src/, test/build/obj/, $(TESTSRC))
+#TESTOBJ := $(subst .c,.o ,$(TEMPOBJ))
+#TESTDEP := $(subst .c,.d ,$(TEMPOBJ))
+#TEMPBIN := $(subst test/src/, test/build/bin/, $(TESTSRC))
+TESTBIN := $(subst .c,.exe ,$(wildcard *.c))
+#LIBSRC := $(-shell ls lib/*.c lib/*/*.c)
+##########################################################################
+#@echo -e $(join $(PATHOBJ),$(call changeSuffix,test/build/bin/TestLcdController.exe,.o))
+PATHOBJ:= test/build/obj/
+PATH_BIN:= test/build/bin/
+PATH_TSRC:=test/src/
+BUILDPATH:=build/
+VPATH=$(BUILDPATH)
 
 
-test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
-	@-./$(PATHBIN)TestLcdDecorator.exe > $(PATHR)TestLcdDecorator.txt 2>&1
-	@echo -e "-----------------------\nSUMMARY\n------------------------"
-	@echo -e `grep -s Tests $(PATHR)TestLcdDecorator.txt`
-	@echo -e "-----------------------\nIGNORES:\n-----------------------"
-	@echo -e `grep -s IGNORE $(PATHR)TestLcdDecorator.txt`
-	@echo -e "-----------------------\nFAILURES:\n-----------------------"
-	@echo -e `grep -s FAIL $(PATHR)TestLcdDecorator.txt`
+kaan : $(TESTBIN) unity.o
 	@echo -e "-----------------------"
-	@echo -e "DONE"
+	@echo -e "Target : 1 $^"
 	@echo -e "-----------------------"
 
+Test%.exe : Test%.o 
+	gcc -c $(INCLUDES) $^ -o $@  
 
-	%.exe : $(PATHOBJ)Test%.o $(PATHOBJ)%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc  $(CFLAGS) -o $(PATHBIN)TestLcdDecorator.exe  $^
-	@echo -e "-----------------------"
+unity.o : ../lib/unity/unity.c
+	$(CC) $(INCLUDES) -o $@ $^
 
-$(PATHBIN)TestLcdDecorator.exe : build/obj/TestLcdDecorator.o build/obj/LcdDecorator.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc  $(CFLAGS) -o $@  $^
-	@echo -e "-----------------------"
+Test%.o : Test%.c unity.o Test%.d
+	adsadas
+	$(CC) $(INCLUDES) -o $@ $^
 
-$(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc -c $(CFLAGS) $(PATHT)TestLcdDecorator.c  -o $@ 
-	@echo -e "-----------------------"
-
-$(PATHOBJ)TestLcdDecorator.d : $(PATHT)TestLcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(DEPEND) $@ $<
-	@echo -e "-----------------------"
+%.d : %.c
+	$(DEPEND) $@ $<
 	
-
-$(PATHOBJ)LcdDecorator.o : $(PATH_DVCC)LcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@gcc -c $(CFLAGS) $<  -o $@ 
-	@echo -e "-----------------------"
-
-$(LIBRARY)unity/build/%.o : $(LIBRARY)unity/%.c
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(COMPILE) $< -o $@  
-	@echo -e "-----------------------"
-
-$(PATH_VEC)Vector.o: $(PATH_VEC)Vector.c
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(COMPILE) $(CFLAGS) $< -o $@  
-	@echo -e "-----------------------"
-
-$(PATHB):
-	mkdir $@
-
-$(PATHOBJ):
-	mkdir $@
-
-$(PATHBIN):
-	mkdir $@
-
-$(PATHR):
-	mkdir $@
+	
 
 clean :
-	$(CLEANUP) $(PATHOBJ)*.o
-	$(CLEANUP) $(PATHOBJ)*.d
-	$(CLEANUP) $(PATHBIN)*.exe
-	$(CLEANUP) $(PATHR)*.txt
-	$(CLEANUP) $(LIBRARY)*/build/*.o 
+	$(CLEANUP) *.o
+	$(CLEANUP) *.d
 
+
+
+.PHONY: kaan
 	
+.PHONY: clean
+.PHONY: test

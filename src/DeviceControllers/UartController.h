@@ -7,8 +7,8 @@
 
 #ifndef UARTCONTROLLER_H_
 #define UARTCONTROLLER_H_
-#include "xuartlite.h"
-#include "xuartlite_l.h"
+#include <xuartlite.h>
+#include <xuartlite_l.h>
 #include "../Utilities/Util.h"
 #include "string.h"
 #define MAX_BUFFER_SIZE 16

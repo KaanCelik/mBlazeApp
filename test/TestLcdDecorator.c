@@ -18,6 +18,7 @@ void setUp(){
 	configPtr->maxRows = 2;
 	configPtr->maxCols = 16;
 	configPtr->displayMode= HEX;
+
 }
 
 
