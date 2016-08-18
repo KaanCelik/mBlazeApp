@@ -5,7 +5,7 @@
  *      Author: KaaN
  */
 #include "LcdController.h"
-#include "StringArray.h"
+
 
 XUartLite lcdUart;
 StringArray* lcdStrTablePtr;
@@ -22,7 +22,7 @@ u32 lcd_init(u32 deviceId){
 
 
 void lcd_setBuffer(Vector* byteVector){
-	calculateDisplayMatrix(Vector* byteVector);
+	//calculateDisplayMatrix(Vector* byteVector);
 	lcdStrTablePtr = getLcdStringArray();
 }
 
@@ -36,7 +36,7 @@ u32 displayRows(u16* rowIndexes, int len){
 	strcpy(bundle,escSeq);
 	int i;
 	for(i=0;i<len;i++){
-		sendString((u8*)rows[rowIndexes[i]],&lcdUart);
+		sendString((u8*)getElement(lcdStrTablePtr,i),&lcdUart);
 	}
 	return XST_SUCCESS;
 }

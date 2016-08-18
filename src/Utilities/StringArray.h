@@ -3,14 +3,14 @@
 
 typedef struct StringArray{
 	int count;
-	char data[][];
-};
+	char** data;
+}StringArray;
 
 void construct(StringArray * strArray);
 void destroy(StringArray * strArray);
 
 int getCount();
-char * getElement(int i);
+char * getElement(StringArray* strArrayPtr,int i);
 void setElement(int i, char* str);
 
 #endif /* STRINGARRAY_H_ */

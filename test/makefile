@@ -53,13 +53,13 @@ test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
 	@echo -e "-----------------------"
 
 
-$(PATHBIN)Test%.exe : $(PATHOBJ)Test%.o $(PATHOBJ)%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
+	%.exe : $(PATHOBJ)Test%.o $(PATHOBJ)%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
 	@gcc  $(CFLAGS) -o $(PATHBIN)TestLcdDecorator.exe  $^
 	@echo -e "-----------------------"
 
-$(PATHBIN)%.exe : build/obj/%.o build/obj/%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
+$(PATHBIN)TestLcdDecorator.exe : build/obj/TestLcdDecorator.o build/obj/LcdDecorator.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
 	@echo -e "-----------------------"
 	@echo -e "Target : $@"  
 	@gcc  $(CFLAGS) -o $@  $^

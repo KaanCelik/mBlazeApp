@@ -9,6 +9,7 @@
 #define LCDCONTROLLER_H_
 #include "UartController.h"
 #include "../Utilities/Vector.h"
+#include "../Utilities/StringArray.h"
 
 
 
@@ -72,5 +73,5 @@ void lcd_setBuffer(Vector* byteVector);
  * @return	- XST_SUCCESS
  * 			- XST_FAILURE
  */
-u32 displayRows(u16* rowIndexes, int len)
+u32 displayRows(u16* rowIndexes, int len);
 #endif /* LCDCONTROLLER_H_ */
