@@ -47,27 +47,25 @@ TESTBIN := $(subst .c,.exe ,$(TEMPBIN))
 LIBSRC := $(-shell ls lib/*.c lib/*/*.c)
 ##########################################################################
 #@echo -e $(join $(PATHOBJ),$(call changeSuffix,test/build/bin/TestLcdController.exe,.o))
+#	@echo -e $(addprefix $(PATH_TSRC),$(addsuffix .c,$(basename $(notdir $@))))
 PATHOBJ:=test/build/obj/
 PATH_TSRC:=test/src/
 BUILDPATHS=test/build/ test/build/bin/ test/build/obj/ test/build/reports/
 
-test : $(TESTOBJ)
+test : $(TESTDEP)
 	@echo -e "-----------------------"
-	@echo -e "Target : 1 $<"
-	@echo -e "-----------------------"
-	
-%.o : $(TESTDEP)
-	@echo -e "-----------------------"
-	@echo -e "Target : 2 $@"
+	@echo -e "Target : 1  < $+"
+	@echo -e "Target : 1  @ $@"
 	@echo -e "-----------------------"
 
-	
-%.d	: $(join $(PATH_TSRC),$(call changeSuffix,%.d,.c))
+.SECONDEXPANSION:
+
+%.d : test/src/$$(notdir $$)%.c
 	@echo -e "-----------------------"
-	@echo -e "Target : 3 $@"
-	@echo -e $(join $(PATH_TSRC),$(call changeSuffix,$@,.c))
+	@echo -e "Target : 2  < $+"
+	@echo -e "Target : 2  @ $@"
 	@echo -e "-----------------------"
-	
+
 $(PATHB):
 	mkdir $@
 

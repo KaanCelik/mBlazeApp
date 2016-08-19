@@ -4,11 +4,11 @@
  *  Created on: 14 Aðu 2016
  *      Author: KaaN
  */
-#include "../../src/DeviceControllers/LcdDecorator.h"
-#include "../../lib/unity/unity.h"
+#include "../src/DeviceControllers/LcdDecorator.h"
+#include "../lib/unity/unity.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../src/Utilities/Vector.h"
+#include "../src/Utilities/Vector.h"
 
 LcdConfig* configPtr;
 

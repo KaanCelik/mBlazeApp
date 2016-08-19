@@ -1,118 +1,75 @@
-ifeq ($(OSTYPE),cygwin)
-	CLEANUP=rm -rf
-	MKDIR=mkdir -p
-	TARGET_EXTENSION=out
-else ifeq ($(OS),Windows_NT)
-	CLEANUP=rm -rf
-	MKDIR=mkdir
-	TARGET_EXTENSION=exe
-else
-	CLEANUP=rm -rf
-	MKDIR=mkdir -p
-	TARGET_EXTENSION=out
-endif
-#Include Directories
-PATHT=src/
-PATHSO=../Debug/src/DeviceControllers/
-PATHOBJ=build/obj/
-PATHBIN=build/bin/
-PATHR=build/report/
-PATHB=build/
-#Includes
-LIBRARY=../lib/
-PATHU=../lib/unity/
-PATH_DVCC=../src/DeviceControllers/
-PATH_VEC=../src/Utilities/
-PATH_BSP = ../../mBlaze_v1.3_bsp/microblaze_0/include/
-#Commands
+#################################### MAKEFILE ##################################
+################################################################################
+## Configurations
+################################################################################
+C_SOURCES := $(shell ls *.c)
+LIB_INCLUDE:= $(shell ls -d ../lib/*/ ../lib/)
+SRC_INCLUDE:= $(shell ls -d ../src/*/ ../src/)
+SRC_HEADERS:= $(shell ls ../src/*/*.h ../src/*.h)
+INCLUDES:=  $(subst ../src, -I../src,$(SRC_INCLUDE)) $(subst ../lib, -I../lib,$(LIB_INCLUDE)) 
+V_SRC:=$(patsubst -I%, :%,$(SRC_INCLUDE))
+V_LIB:=$(patsubst -I%, :%,$(LIB_INCLUDE))
+VPATH=build/ $(V_SRC) $(V_LIB)
+OBJ_DIR:=build/
+TESTOBJ := $(subst .c,.o,$(C_SOURCES))
+TESTBIN := $(subst .c,.exe,$(C_SOURCES))
+################################################################################
+## Commands
+################################################################################
+CFLAGS+= $(INCLUDES)
+COMPILE=gcc -c -Wall
+CLEANUP=rm -rf
 DEPEND=gcc -MM -MG -MF
-LINK=gcc
+################################################################################
+## Test Configurations
+################################################################################
 
-COMPILE=gcc -Wall -c 
-CFLAGS= -I$(PATHU) -I$(PATH_DVCC) -I$(PATH_BSP) -I$(LIBRARY) -I$(PATH_VEC)
-
-
-BUILD_PATHS= $(PATHB) $(PATHOBJ) $(PATHBIN) $(PATHR)
-
-EXES=$(PATHBIN)TestLcdDecorator.exe $(PATHBIN)TestLcdController.exe
-#Recipes
-
-all : $(EXES)
+TEST_SOURCES= $(wildcard *.c)
+GET_DEPENDENCY= $(patsubst Test%.c,%.d,$(1))
+GET_BUNDLE= $(1) $(call GET_DEPENDENCY,$(1))
 
 
-test : $(BUILD_PATHS) $(PATHBIN)TestLcdDecorator.exe
-	@-./$(PATHBIN)TestLcdDecorator.exe > $(PATHR)TestLcdDecorator.txt 2>&1
-	@echo -e "-----------------------\nSUMMARY\n------------------------"
-	@echo -e `grep -s Tests $(PATHR)TestLcdDecorator.txt`
-	@echo -e "-----------------------\nIGNORES:\n-----------------------"
-	@echo -e `grep -s IGNORE $(PATHR)TestLcdDecorator.txt`
-	@echo -e "-----------------------\nFAILURES:\n-----------------------"
-	@echo -e `grep -s FAIL $(PATHR)TestLcdDecorator.txt`
-	@echo -e "-----------------------"
-	@echo -e "DONE"
-	@echo -e "-----------------------"
+################################################################################
+
+# destination path macro we'll use below
+df = $(OBJ_DIR)$(*F)
+
+# create a list of auto dependencies
+AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(C_SOURCES))
+
+# include by auto dependencies
+-include $(AUTODEPS)
 
 
-	%.exe : $(PATHOBJ)Test%.o $(PATHOBJ)%.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc  $(CFLAGS) -o $(PATHBIN)TestLcdDecorator.exe  $^
-	@echo -e "-----------------------"
 
-$(PATHBIN)TestLcdDecorator.exe : build/obj/TestLcdDecorator.o build/obj/LcdDecorator.o $(PATHU)build/unity.o $(PATH_VEC)Vector.o
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc  $(CFLAGS) -o $@  $^
-	@echo -e "-----------------------"
+%.d : %.c
+	$(DEPEND) $(OBJ_DIR)$@ $<
+#.... other rules
+build : clean link
 
-$(PATHOBJ)TestLcdDecorator.o : $(PATHOBJ)TestLcdDecorator.d  $(PATHT)TestLcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"  
-	@gcc -c $(CFLAGS) $(PATHT)TestLcdDecorator.c  -o $@ 
-	@echo -e "-----------------------"
 
-$(PATHOBJ)TestLcdDecorator.d : $(PATHT)TestLcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(DEPEND) $@ $<
-	@echo -e "-----------------------"
-	
+link : $(TESTBIN)
+	@echo "Target $@"
 
-$(PATHOBJ)LcdDecorator.o : $(PATH_DVCC)LcdDecorator.c 
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@gcc -c $(CFLAGS) $<  -o $@ 
-	@echo -e "-----------------------"
+%.exe: $(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst Test%.c,%.o,$(wildcard *.c)) vector.o unity.o
+	@echo "$@ --> $+"
+	@echo -e "----------------------\n"
+	@#gcc $(INCLUDES) -o $@ $^
+	gcc $(INCLUDES) -o $@ $(foreach f,$^,$(OBJ_DIR)$(f)) 
 
-$(LIBRARY)unity/build/%.o : $(LIBRARY)unity/%.c
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(COMPILE) $< -o $@  
-	@echo -e "-----------------------"
 
-$(PATH_VEC)Vector.o: $(PATH_VEC)Vector.c
-	@echo -e "-----------------------"
-	@echo -e "Target : $@"
-	@$(COMPILE) $(CFLAGS) $< -o $@  
-	@echo -e "-----------------------"
+# and last but not least my generic compiler rule
+%.o: %.c
+	@# Build the dependency file
+	@#gcc -MM -MP -MT $(df).o -MT $(df).d  $< > $(df).d 
+	@# Compile the object file
+	@echo " GCC : " $< " => " $@
+	@$(COMPILE) $< $(CFLAGS) -o $(OBJ_DIR)$@
 
-$(PATHB):
-	mkdir $@
-
-$(PATHOBJ):
-	mkdir $@
-
-$(PATHBIN):
-	mkdir $@
-
-$(PATHR):
-	mkdir $@
 
 clean :
-	$(CLEANUP) $(PATHOBJ)*.o
-	$(CLEANUP) $(PATHOBJ)*.d
-	$(CLEANUP) $(PATHBIN)*.exe
-	$(CLEANUP) $(PATHR)*.txt
-	$(CLEANUP) $(LIBRARY)*/build/*.o 
+	@cls
+	$(CLEANUP) $(OBJ_DIR)*.o
+	$(CLEANUP) $(OBJ_DIR)*.d
 
-	
+.PHONY: clean test build link
