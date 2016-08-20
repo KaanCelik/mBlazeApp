@@ -7,7 +7,7 @@
 
 #ifndef UTIL_H_
 #define UTIL_H_
-#include "xbasic_types.h"
+#include <xil_types.h>
 #include <stdio.h>
 
 #define checkStatus(status) if (status != XST_SUCCESS){xil_printf("Fail!\r\n");return XST_FAILURE;}

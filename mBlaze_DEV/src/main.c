@@ -56,7 +56,8 @@ int main()
 	/***************************************************************/
 	//UartLite
 	/***************************************************************/
-	Status = lcd_init(XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	XUartLite lcdUart;
+	Status = constructUartController(&lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
 	assertStatus(Status,"LCD Uart initialization was unsuccesful.");
 	/***************************************************************/
 	//Bluetooth
@@ -110,6 +111,7 @@ int main()
 					}
 					if(switchInput==4){
 						Vector* bramData = brc_getStack();
+						//implement vector to string array conversion here
 						lcd_setBuffer(bramData);
 						lcd_display();
 					}

@@ -8,16 +8,16 @@
 
 
 XUartLite lcdUart;
+u32 lcdDeviceId;
 StringArray* stringDataTable;
 
 const char escSeq[3] = {0x1B,'[', '\0'};
 u16* currentRow;
 
-u32 lcd_init(u32 deviceId){
-	u32 status;
-	status = initUartController(&lcdUart,deviceId );
-	return status;
-	//construct(&lcdBuffer);
+void constructLcdCtr(XUartLite* uartCtr, u32 deviceId){
+	lcdUart= *uartCtr;
+	lcdDeviceId=deviceId;
+
 }
 
 

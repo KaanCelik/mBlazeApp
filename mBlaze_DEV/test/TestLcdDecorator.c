@@ -10,7 +10,9 @@
 #include <stdlib.h>
 #include "../src/Utilities/Vector.h"
 
+
 LcdConfig* configPtr;
+
 
 void setUp(){
 

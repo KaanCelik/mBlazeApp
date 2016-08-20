@@ -13,10 +13,7 @@
 
 #define DISPLAY_MATRIX_ROW  2
 
-
-
-
-u32 lcd_init(u32 deviceId);
+void constructLcdCtr(XUartLite* uartCtr, u32 deviceId);
 
 /**
  * Clears the LCD display area. Sets cursor to the beginning.

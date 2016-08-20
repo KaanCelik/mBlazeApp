@@ -5,9 +5,9 @@
  *      Author: KaaN
  */
 #include "UartController.h"
+#include <stdlib.h>
 
-
-u16 initUartController(XUartLite* uartPtr, u16 uartDeviceId){
+u16 constructUartController(XUartLite* uartPtr,u16 uartDeviceId){
 	u16 Status;
 	Status = XUartLite_Initialize(uartPtr,uartDeviceId);
 	if (Status != XST_SUCCESS){return XST_FAILURE;}

@@ -15,7 +15,7 @@ volatile u8 lastReceivedCount;
 
 u8 bt_setUp(u32 uartDeviceId){
 	vector_init(&rxStack);
-	u8 status = initUartController(&blueToothUartCtr,uartDeviceId);
+	u8 status = constructUartController(&blueToothUartCtr,uartDeviceId);
 	return status;
 }
 
