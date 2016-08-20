@@ -13,8 +13,26 @@
 
 #define DISPLAY_MATRIX_ROW  2
 
-void constructLcdCtr(XUartLite* uartCtr, u32 deviceId);
+typedef struct LcdController {
+	XUartLite uartDeviceCtr;
+	u32 lcdUartDeviceId;
+	StringArray* stringDataTable;
+} LcdController;
 
+/**
+ * Initializes a static LcdController struct. Assigns a uart controller
+ * to it and also sets data pointer to NULL as a initial value.
+ *
+ * @param	uartCtr is a pointer to initialized XuartLite struct.
+ * @param	deviceId is the device id of the device which uartCtr
+ * 			corresponds to.
+ *
+ * @return	void
+ */
+void lcd_construct(XUartLite* uartCtr, u32 deviceId);
+
+
+LcdController* lcd_getController();
 /**
  * Clears the LCD display area. Sets cursor to the beginning.
  */

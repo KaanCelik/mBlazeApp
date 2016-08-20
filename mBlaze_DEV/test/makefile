@@ -34,7 +34,7 @@ LINK_DEPS= Test$(1).o $(1).o vector.o unity.o
 ################################################################################
 ## Rules
 ################################################################################
-all : build
+all : build test
 
 
 # Dependency file detination
@@ -51,8 +51,10 @@ AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(C_SOURCES))
 #.... other rules
 
 ################################################################################
+test : $(TEST_TXT)
+	@echo "TESTS COMPLETED!"
 
-test : cleanTXT $(TEST_TXT)
+show : cleanTXT $(TEST_TXT)
 	@echo "TESTS COMPLETED!"	
 
 %.txt : %.exe
@@ -97,5 +99,5 @@ clean :
 cleanTXT : 
 	@cls
 	@$(CLEANUP) $(OBJ_DIR)*.txt
-.PHONY: clean test build link all cleanTXT
+.PHONY: clean test build link all cleanTXT show
 

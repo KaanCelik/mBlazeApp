@@ -7,23 +7,25 @@
 #include "LcdController.h"
 
 
-XUartLite lcdUart;
-u32 lcdDeviceId;
-StringArray* stringDataTable;
 
+LcdController lcdCtr;
 const char escSeq[3] = {0x1B,'[', '\0'};
 u16* currentRow;
 
-void constructLcdCtr(XUartLite* uartCtr, u32 deviceId){
-	lcdUart= *uartCtr;
-	lcdDeviceId=deviceId;
+void lcd_construct(XUartLite* uartCtrPtr, u32 deviceId){
+	lcdCtr.uartDeviceCtr = *uartCtrPtr;
+	lcdCtr.lcdUartDeviceId=deviceId;
+	lcdCtr.stringDataTable = NULL;
+}
 
+LcdController* lcd_getController(){
+	return &lcdCtr;
 }
 
 
 void lcd_setBuffer(StringArray* processedStrings){
 	//calculateDisplayMatrix(Vector* byteVector);
-	stringDataTable = processedStrings;
+	lcdCtr.stringDataTable = processedStrings;
 }
 
 
