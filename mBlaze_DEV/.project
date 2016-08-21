@@ -4,12 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>mBlaze_BSP</project>
-		<project>mBlaze_v1.3_bsp</project>
-		<project>mBlaze_v1.2.1_bsp</project>
-		<project>mBlaze_v1.2.1</project>
-		<project>mBlaze_v1.1_bsp</project>
-		<project>mBlaze_bsp_v1</project>
-		<project>mBlaze_bsp_0</project>
+		<project>mBlaze_HW</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

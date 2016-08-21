@@ -17,6 +17,7 @@ typedef struct LcdController {
 	XUartLite uartDeviceCtr;
 	u32 lcdUartDeviceId;
 	StringArray* stringDataTable;
+	char lcdSendBuffer[16];
 } LcdController;
 
 /**

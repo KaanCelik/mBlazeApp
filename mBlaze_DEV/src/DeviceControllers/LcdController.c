@@ -95,3 +95,10 @@ u32 lcd_displayPrevious(){
 	status = displayRow(*currentRow);
 	return status;
 }
+
+void lcd_clearDisplay(){
+
+	strcpy(lcdCtr.lcdSendBuffer,(char*)escSeq);
+	strcat(lcdCtr.lcdSendBuffer,"j");
+	sendString((u8*)lcdCtr.lcdSendBuffer,&lcdCtr.uartDeviceCtr);
+}

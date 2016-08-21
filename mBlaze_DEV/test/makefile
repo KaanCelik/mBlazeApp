@@ -51,33 +51,37 @@ AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(C_SOURCES))
 #.... other rules
 
 ################################################################################
-test : $(TEST_TXT)
+test : $(TEST_TXT) show
 	@echo "TESTS COMPLETED!"
 
-show : cleanTXT $(TEST_TXT)
-	@echo "TESTS COMPLETED!"	
+REPORT_DIR:=report/
+BIN_DIR:=bin/
 
+show : $(REPORT_DIR)Report.exe
+	@cls
+	@echo "REPORTING RESULTS !"
+	@-./$(REPORT_DIR)Report.exe $(foreach txt,$(TEST_TXT), $(OBJ_DIR)$(txt))
+	
 %.txt : %.exe
-	@-./$(patsubst %.txt,%.exe,$@) > $(OBJ_DIR)$@ 2>&1
-	@echo -e "-----------------------\nSUMMARY\n------------------------"
-	@echo -e `grep -s Tests $(OBJ_DIR)$@`
-	@echo -e "-----------------------\nIGNORES:\n-----------------------"
-	@echo -e `grep -s IGNORE $(OBJ_DIR)$@`
-	@echo -e "-----------------------\nFAILURES:\n-----------------------"
-	@echo -e `grep -s FAIL $(OBJ_DIR)$@`
-	@echo -e "-----------------------"
-	@echo -e "DONE"
-	@echo -e "-----------------------"
+	@-./$(BIN_DIR)$(patsubst %.txt,%.exe,$@) > $(OBJ_DIR)$@ 2>&1
 
 build : $(TESTBIN)
 	@echo "Binary build succesful!"
+	
+
 
 Test%.exe: $(call LINK_DEPS,%)
 	@echo -e "----------------------" 
 	@echo "$@ -- Link --> $+"
 	@echo -e "----------------------"
-	@gcc -o $@ $(foreach f,$^,$(OBJ_DIR)$(notdir $(f))) $(CFLAGS) 
+	gcc -o $(BIN_DIR)$@ $(foreach f,$^,$(OBJ_DIR)$(notdir $(f))) $(CFLAGS) 
 	
+$(REPORT_DIR)Report.exe: $(REPORT_DIR)Report.o
+	@gcc -o $@ $< $(CFLAGS)
+
+$(REPORT_DIR)Report.o : $(REPORT_DIR)Report.c
+	@echo " GCC : " $< " => " $@
+	@-$(COMPILE) $< $(CFLAGS) -o $@
 	
 %.o: %.c
 	@# Build the dependency file
