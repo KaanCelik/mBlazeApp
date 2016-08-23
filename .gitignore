@@ -47,6 +47,9 @@ Temporary Items
 .apdisk
 
 #Generated Files
-Debug
-Release
-test/build
+mBlaze_DEV/Debug
+mBlaze_DEV/Release
+mBlaze_DEV/test/build
+mBlaze_DEV/test/*.o
+mBlaze_DEV/test/*/*.o
+mBlaze_DEV/test/*.exe
