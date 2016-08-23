@@ -5,7 +5,7 @@
  *      Author: KaaN
  */
 #include "../src/DeviceControllers/LcdDecorator.h"
-#include "../lib/unity/unity.h"
+#include "unity.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../src/Utilities/Vector.h"

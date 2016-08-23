@@ -9,8 +9,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
-#include "../lib/cmocka/cmocka.h"
-#include "../lib/unity/unity.h"
+#include "../lib/include/cmocka.h"
+#include "unity.h"
 #include <xuartlite.h>
 #include "../src/DeviceControllers/LcdController.h"
 #include "../src/Utilities/Vector.h"
@@ -61,6 +61,8 @@ void test_constructLcdCtr(){
 }
 
 void test_lcd_clearDisplay(){
+	/*
+
 	char escSeq[3] = {0x1B,'[', '\0'};
 	strcpy(lcdStreamBuffer,(char*)escSeq);
 	strcat(lcdStreamBuffer,"j");
@@ -97,6 +99,7 @@ void test_displayRows(){
 int main(void){
 
 	UNITY_BEGIN();
+
 	RUN_TEST(test_constructLcdCtr);
 	RUN_TEST(test_lcd_clearDisplay);
 	RUN_TEST(test_lcd_displayNext);
@@ -105,7 +108,7 @@ int main(void){
 	RUN_TEST(test_displayRows);
 
 	return UNITY_END();
-
+	
 }
 
 

@@ -2,25 +2,29 @@
 ################################################################################
 ## Configurations
 ################################################################################
-C_SOURCES := $(shell ls *.c)
-LIB_INCLUDE:= $(shell ls -d ../lib/*/)
+TEST_SOURCES := $(foreach tSrc,$(shell ls src/*.c), $(notdir $(tSrc)))
+LIB_INCLUDE:=lib/include/ lib/
 SRC_INCLUDE:= $(shell ls -d ../src/*/ ../src/)
 BSP_INCLUDE:=../../mBlaze_BSP/microblaze_0/include/
 SRC_HEADERS:= $(shell ls ../src/*/*.h ../src/*.h)
 INCLUDES:=  $(subst ../src, -I../src,$(SRC_INCLUDE)) \
-			$(subst ../lib, -I../lib,$(LIB_INCLUDE)) -I$(BSP_INCLUDE)
+			$(subst lib, -Ilib,$(LIB_INCLUDE)) -I$(BSP_INCLUDE)
 V_SRC:=$(patsubst -I%, :%,$(SRC_INCLUDE))
 V_LIB:=$(patsubst -I%, :%,$(LIB_INCLUDE))
-VPATH=build/ $(V_SRC) $(V_LIB)
+VPATH=src/ build/ bin/ $(V_SRC) $(V_LIB)
 OBJ_DIR:=build/
-TESTOBJ := $(subst .c,.o,$(C_SOURCES))
-TESTBIN := $(subst .c,.exe,$(C_SOURCES))
-TEST_TXT:= $(subst .c,.txt,$(C_SOURCES))
+TESTOBJ := $(subst .c,.o,$(TEST_SOURCES))
+TESTBIN := $(subst .c,.exe,$(TEST_SOURCES))
+TEST_TXT:= $(subst .c,.txt,$(TEST_SOURCES))
+REPORT_DIR:=report/
+BIN_DIR:=bin/
 ################################################################################
 ## Commands
 ################################################################################
-
-CFLAGS+= $(INCLUDES)
+## Don't forget to add -L directories to runtime environment PATH variable.
+## Execute this on msys console.
+## export PATH=$PATH:/d/projects/mblazeapp/mblaze_dev/test/lib/bin
+CFLAGS+= $(INCLUDES) -Llib/bin/ -lcmocka 
 COMPILE=gcc -c -Wall
 CLEANUP=rm -rf
 DEPEND=gcc -MM -MG -MF
@@ -41,7 +45,7 @@ all : build test
 df = $(OBJ_DIR)$(*F)
 
 # List of auto dependencies
-AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(C_SOURCES))
+AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(TEST_SOURCES))
 
 # Include auto dependencies
 -include $(AUTODEPS)
@@ -54,8 +58,7 @@ AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(C_SOURCES))
 test : $(TEST_TXT) show
 	@echo "TESTS COMPLETED!"
 
-REPORT_DIR:=report/
-BIN_DIR:=bin/
+
 
 show : $(REPORT_DIR)Report.exe
 	@cls
@@ -96,12 +99,19 @@ clean :
 	@cls
 	$(CLEANUP) $(OBJ_DIR)*.o
 	$(CLEANUP) $(OBJ_DIR)*.d
-	$(CLEANUP) *.exe
 	$(CLEANUP) *.d
 	$(CLEANUP) $(OBJ_DIR)*.txt
+	$(CLEANUP) $(BIN_DIR)*.exe
 
 cleanTXT : 
 	@cls
 	@$(CLEANUP) $(OBJ_DIR)*.txt
-.PHONY: clean test build link all cleanTXT show
+
+param :
+	 @echo "VPATH 		: $(VPATH)\n"
+	 @echo "CFLAGS		: $(CFLAGS)\n"
+	 @echo "INCLUDES 	: $(INCLUDES)\n"
+
+
+.PHONY: clean test build link all cleanTXT show param
 
