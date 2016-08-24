@@ -39,24 +39,23 @@ void setViewToDefault(){
 	}	
 }
 
-u32 displayRow(u16 rowIndex){
+u32 lcd_displayRow(u16 rowIndex){
 
-	char* bundle="";
-	strcpy(bundle,escSeq);
+
 	u32 status = 0;
-	// implement send logic
-	//sendString((u8*)getElement(stringDataTable,rowIndex),&lcdUart);
+
+	status = sendString((u8*) lcdCtr.availRows.items[rowIndex],&lcdCtr.uartDeviceCtr);
 	return status;
 
 }
 
 
-u32 displayRows()
+u32 lcd_displayRows()
 {
 	u32 status;
     int i = 0;
     for (i = 0; i < DISPLAY_MATRIX_ROW; ++i) {
-		status = displayRow(lcdCtr.currentViewRows[i]);
+		status = lcd_displayRow(lcdCtr.currentViewRows[i]);
 	}
     return status;
 }
@@ -64,7 +63,7 @@ u32 displayRows()
 u32 lcd_display() {
 	setViewToDefault();
 	u32 status;
-    status = displayRows();
+    status = lcd_displayRows();
     return status;
 }
 
@@ -87,14 +86,14 @@ void setViewToPrev() {
 u32 lcd_displayNext(){
 	setViewToNext();
 	u32 status = 0;
-	//status = displayRow(*lcdCtr.currentViewRows);
+	status = lcd_displayRows(*lcdCtr.currentViewRows);
 	return status;
 }
 
 u32 lcd_displayPrevious(){
 	setViewToPrev();
 	u32 status;
-	status = displayRow(*lcdCtr.currentViewRows);
+	status = lcd_displayRows(*lcdCtr.currentViewRows);
 	return status;
 }
 

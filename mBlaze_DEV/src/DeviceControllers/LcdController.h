@@ -76,22 +76,24 @@ void lcd_setBuffer(arraylist_t* processedRows);
 
 
 /**
- * Displays the selected rows by sending the proper commands via
- * uart to the device.By default it moves the cursor to the beginning
+ * Displays the selected row by sending the proper commands via
+ * uart to the LCD device.By default it moves the cursor to the beginning
  * and then puts the rows to display.Caller must call calculateDisplayMatrix()
  * method prior to this method.
  *
  *
- * @param 	rowIndex is a array of integers. Specifies which exact row
+ * @param 	rowIndex is the position of the selected row within availRows. Specifies which exact row
  * 			must be displayed.
  *
  * @return	- XST_SUCCESS
  * 			- XST_FAILURE
  */
-u32 displayRow(u16 rowIndex);
+u32 lcd_displayRow(u16 rowIndex);
 
-
-u32 displayRows();
+/**
+* Displays current rows.
+*/
+u32 lcd_displayRows();
 
 void setViewToDefault();
 
