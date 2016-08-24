@@ -61,15 +61,15 @@ test : $(TEST_TXT) show
 
 
 show : $(REPORT_DIR)Report.exe
-	@cls
-	@echo "REPORTING RESULTS !"
+	@#cls
+	@echo -e "-------- TEST RESULTS --------\n"
 	@-./$(REPORT_DIR)Report.exe $(foreach txt,$(TEST_TXT), $(OBJ_DIR)$(txt))
 	
 %.txt : %.exe
 	@-./$(BIN_DIR)$(patsubst %.txt,%.exe,$@) > $(OBJ_DIR)$@ 2>&1
 
 build : $(TESTBIN)
-	@echo "Binary build succesful!"
+	@echo -e "Binary build succesful!\n"
 	
 
 
@@ -77,13 +77,13 @@ Test%.exe: $(call LINK_DEPS,%)
 	@echo -e "----------------------" 
 	@echo "$@ -- Link --> $+"
 	@echo -e "----------------------"
-	gcc -o $(BIN_DIR)$@ $(foreach f,$^,$(OBJ_DIR)$(notdir $(f))) $(CFLAGS) 
+	@gcc -o $(BIN_DIR)$@ $(foreach f,$^,$(OBJ_DIR)$(notdir $(f))) $(CFLAGS) 
 	
 $(REPORT_DIR)Report.exe: $(REPORT_DIR)Report.o
 	@gcc -o $@ $< $(CFLAGS)
 
 $(REPORT_DIR)Report.o : $(REPORT_DIR)Report.c
-	@echo " GCC : " $< " => " $@
+	@echo " Compile : " $< " => " $@
 	@-$(COMPILE) $< $(CFLAGS) -o $@
 	
 %.o: %.c
@@ -91,7 +91,7 @@ $(REPORT_DIR)Report.o : $(REPORT_DIR)Report.c
 	@#gcc -MM -MP -MT $(df).o -MT $(df).d  $< > $(df).d 
 	@-$(DEPEND) $(patsubst %.o,%.d,$(OBJ_DIR)$(@F)) $<
 	@# Compile the object file
-	@echo " GCC : " $< " => " $@
+	@echo " Compile : " $< " => " $@
 	@-$(COMPILE) $< $(CFLAGS) -o $(OBJ_DIR)$@
 
 

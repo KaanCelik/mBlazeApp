@@ -22,6 +22,7 @@ char * lcdStreamBuffer;
 //const char escSeq[3] = {0x1B,'[', '\0'};
 /***** Mock Functions *********************************/
 extern void lcd_clearDisplay();
+
 u16 sendString(u8* data, XUartLite* uartPtr){
 	check_expected_ptr(data);
 	check_expected_ptr(uartPtr);
@@ -30,8 +31,7 @@ u16 sendString(u8* data, XUartLite* uartPtr){
 
 /******************************************************/
 
-
-void setUp(){
+static int group_setUp(){
 	mockUartPtr = (XUartLite*) malloc(sizeof(XUartLite));
 	mockUartPtr->RegBaseAddress = 123;
 	u32 mockDeviceId= 789;
@@ -39,29 +39,34 @@ void setUp(){
 
 	lcdCtrUnderTest = lcd_getController();
 
+	//strcat throws EXCEPTION_ACCESS_VIOLATION without this malloc.
+	lcdStreamBuffer = malloc(sizeof(char)*16); 
+
+	return 0;
 }
 
 
 
-void tearDown(){
-
+static int group_tearDown(){
+	free(mockUartPtr);	
+	return 0;
 }
 
 
 
-void test_constructLcdCtr(){
+
+static void test_constructLcdCtr(){
 
 
 	LcdController* lcdCtrUnderTest = lcd_getController();
 
-	TEST_ASSERT_EQUAL_UINT32( mockUartPtr->RegBaseAddress,(&lcdCtrUnderTest->uartDeviceCtr)->RegBaseAddress);
-	TEST_ASSERT_EQUAL_UINT32( 789,lcdCtrUnderTest->lcdUartDeviceId);
-	TEST_ASSERT_NULL(lcdCtrUnderTest->stringDataTable);
-	free(mockUartPtr);
+	assert_int_equal( mockUartPtr->RegBaseAddress,(&lcdCtrUnderTest->uartDeviceCtr)->RegBaseAddress);
+	assert_int_equal( 789,lcdCtrUnderTest->lcdUartDeviceId);
+	assert_null(lcdCtrUnderTest->stringDataTable);
 }
 
-void test_lcd_clearDisplay(){
-	/*
+static void test_lcd_clearDisplay(){
+	
 
 	char escSeq[3] = {0x1B,'[', '\0'};
 	strcpy(lcdStreamBuffer,(char*)escSeq);
@@ -77,27 +82,27 @@ void test_lcd_clearDisplay(){
 	 * Cmocka must be linked with the library.
 	 * Compiler says undefined reference.
 	 */
-
+	 
 }
 void test_lcd_displayNext(){
 
-	TEST_FAIL();
+	//TEST_FAIL();
 }
 void test_lcd_displayPrevious(){
 
-	TEST_FAIL();
+	//TEST_FAIL();
 }
 
 void test_lcd_setBuffer(){
-	TEST_FAIL();
+	//TEST_FAIL();
 }
 
 void test_displayRows(){
-	TEST_FAIL();
+	//TEST_FAIL();
 }
 
 int main(void){
-
+	/*
 	UNITY_BEGIN();
 
 	RUN_TEST(test_constructLcdCtr);
@@ -108,6 +113,15 @@ int main(void){
 	RUN_TEST(test_displayRows);
 
 	return UNITY_END();
+	*/
+    const struct CMUnitTest LcdControllerTests[] = {
+        cmocka_unit_test(test_constructLcdCtr),
+        cmocka_unit_test(test_lcd_clearDisplay)
+    };
+
+
+	return cmocka_run_group_tests(LcdControllerTests, group_setUp, group_tearDown);
+
 	
 }
 
