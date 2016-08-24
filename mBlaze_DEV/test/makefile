@@ -33,7 +33,7 @@ DEPEND=gcc -MM -MG -MF
 ## Functions
 ################################################################################
 
-LINK_DEPS= Test$(1).o $(1).o vector.o unity.o
+LINK_DEPS= Test$(1).o $(1).o vector.o unity.o arraylist.o
 
 ################################################################################
 ## Rules
@@ -61,7 +61,7 @@ test : $(TEST_TXT) show
 
 
 show : $(REPORT_DIR)Report.exe
-	@#cls
+	@cls
 	@echo -e "-------- TEST RESULTS --------\n"
 	@-./$(REPORT_DIR)Report.exe $(foreach txt,$(TEST_TXT), $(OBJ_DIR)$(txt))
 	

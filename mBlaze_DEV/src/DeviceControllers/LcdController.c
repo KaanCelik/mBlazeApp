@@ -10,12 +10,15 @@
 
 LcdController lcdCtr;
 const char escSeq[3] = {0x1B,'[', '\0'};
-u16* currentRow;
+
 
 void lcd_construct(XUartLite* uartCtrPtr, u32 deviceId){
 	lcdCtr.uartDeviceCtr = *uartCtrPtr;
 	lcdCtr.lcdUartDeviceId=deviceId;
-	lcdCtr.stringDataTable = NULL;
+	arraylist_new(&lcdCtr.availRows,32);
+	lcdCtr.currentViewRows = malloc(sizeof(u16)*DISPLAY_MATRIX_ROW);
+	setViewToDefault();
+
 }
 
 LcdController* lcd_getController(){
@@ -23,11 +26,18 @@ LcdController* lcd_getController(){
 }
 
 
-void lcd_setBuffer(StringArray* processedStrings){
+void lcd_setBuffer(arraylist_t* processedRows){
 	//calculateDisplayMatrix(Vector* byteVector);
-	lcdCtr.stringDataTable = processedStrings;
+	lcdCtr.availRows = *processedRows;
 }
 
+void setViewToDefault(){
+	
+	int i;
+	for(i=0;i<DISPLAY_MATRIX_ROW;i++){
+		lcdCtr.currentViewRows[i]=i;
+	}	
+}
 
 u32 displayRow(u16 rowIndex){
 
@@ -40,21 +50,13 @@ u32 displayRow(u16 rowIndex){
 
 }
 
-void setViewToDefault(){
-	u16 rowIndexArray[DISPLAY_MATRIX_ROW];
 
-		int i;
-		for(i=0;i<DISPLAY_MATRIX_ROW;i++){
-			rowIndexArray[i]=i;
-		}
-		currentRow = rowIndexArray;
-}
-u32 displayRows(u16 *currDisplayedRows)
+u32 displayRows()
 {
 	u32 status;
     int i = 0;
     for (i = 0; i < DISPLAY_MATRIX_ROW; ++i) {
-		status = displayRow(currDisplayedRows[i]);
+		status = displayRow(lcdCtr.currentViewRows[i]);
 	}
     return status;
 }
@@ -62,7 +64,7 @@ u32 displayRows(u16 *currDisplayedRows)
 u32 lcd_display() {
 	setViewToDefault();
 	u32 status;
-    status = displayRows(currentRow);
+    status = displayRows();
     return status;
 }
 
@@ -71,28 +73,28 @@ u32 lcd_display() {
 void setViewToNext() {
 	int i;
 	for (i = 0; i < DISPLAY_MATRIX_ROW; i++) {
-		currentRow[i]++;
+		lcdCtr.currentViewRows[i]++;
 	}
 }
 
 void setViewToPrev() {
 	int i;
 	for (i = 0; i < DISPLAY_MATRIX_ROW; i++) {
-		currentRow[i]--;
+		lcdCtr.currentViewRows[i]--;
 	}
 }
 
 u32 lcd_displayNext(){
 	setViewToNext();
-	u32 status;
-	status = displayRow(*currentRow);
+	u32 status = 0;
+	//status = displayRow(*lcdCtr.currentViewRows);
 	return status;
 }
 
 u32 lcd_displayPrevious(){
 	setViewToPrev();
 	u32 status;
-	status = displayRow(*currentRow);
+	status = displayRow(*lcdCtr.currentViewRows);
 	return status;
 }
 

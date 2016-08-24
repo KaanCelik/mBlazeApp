@@ -24,6 +24,7 @@ char * lcdStreamBuffer;
 extern void lcd_clearDisplay();
 
 u16 sendString(u8* data, XUartLite* uartPtr){
+	//printf("Uart sending : %s\r\n",(char*)data);
 	check_expected_ptr(data);
 	check_expected_ptr(uartPtr);
 	return ((u16) (size_t)mock());
@@ -62,7 +63,11 @@ static void test_constructLcdCtr(){
 
 	assert_int_equal( mockUartPtr->RegBaseAddress,(&lcdCtrUnderTest->uartDeviceCtr)->RegBaseAddress);
 	assert_int_equal( 789,lcdCtrUnderTest->lcdUartDeviceId);
-	assert_null(lcdCtrUnderTest->stringDataTable);
+	assert_non_null( &(lcdCtrUnderTest->availRows));
+	assert_non_null( lcdCtrUnderTest->currentViewRows);
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[0],0);
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[1],1);
+	assert_int_equal((int)lcdCtrUnderTest->availRows.max,32);
 }
 
 static void test_lcd_clearDisplay(){
@@ -77,16 +82,15 @@ static void test_lcd_clearDisplay(){
 	will_return(sendString,0);
 
 	lcd_clearDisplay();
-	//TEST_PASS();
-	/*
-	 * Cmocka must be linked with the library.
-	 * Compiler says undefined reference.
-	 */
 	 
 }
 void test_lcd_displayNext(){
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[0],0);
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[1],1);
+	lcd_displayNext();
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[0],1);
+	assert_int_equal(lcdCtrUnderTest->currentViewRows[1],2);
 
-	//TEST_FAIL();
 }
 void test_lcd_displayPrevious(){
 
@@ -116,7 +120,8 @@ int main(void){
 	*/
     const struct CMUnitTest LcdControllerTests[] = {
         cmocka_unit_test(test_constructLcdCtr),
-        cmocka_unit_test(test_lcd_clearDisplay)
+        cmocka_unit_test(test_lcd_clearDisplay),
+        cmocka_unit_test(test_lcd_displayNext)
     };
 
 

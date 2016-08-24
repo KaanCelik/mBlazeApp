@@ -9,15 +9,15 @@
 #define LCDCONTROLLER_H_
 #include "UartController.h"
 #include "../Utilities/Vector.h"
-#include "../Utilities/StringArray.h"
-
+#include "../Utilities/arraylist.h"
 #define DISPLAY_MATRIX_ROW  2
 
 typedef struct LcdController {
 	XUartLite uartDeviceCtr;
 	u32 lcdUartDeviceId;
-	StringArray* stringDataTable;
+	arraylist_t availRows;
 	char lcdSendBuffer[16];
+	u16* currentViewRows;
 } LcdController;
 
 /**
@@ -68,11 +68,11 @@ u32 lcd_displayPrevious();
 
 
 /**
- * Sets the display buffer. It represents the raw data to be displayed.
+ * Sets the display buffer. It represents the processed data to be displayed.
  *
  * @param 	byteVector is the raw input to be displayed. It can have u8 numbers.
  */
-void lcd_setBuffer(StringArray* processedStrings);
+void lcd_setBuffer(arraylist_t* processedRows);
 
 
 /**
@@ -90,5 +90,9 @@ void lcd_setBuffer(StringArray* processedStrings);
  */
 u32 displayRow(u16 rowIndex);
 
+
+u32 displayRows();
+
+void setViewToDefault();
 
 #endif /* LCDCONTROLLER_H_ */
