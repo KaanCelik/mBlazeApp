@@ -55,7 +55,7 @@ AUTODEPS:= $(patsubst %.c,$(OBJ_DIR)%.d,$(TEST_SOURCES))
 #.... other rules
 
 ################################################################################
-test : $(TEST_TXT) show
+test : $(TEST_TXT) $(TESTBIN) show
 	@echo "TESTS COMPLETED!"
 
 
@@ -73,7 +73,7 @@ build : $(TESTBIN)
 	
 
 
-Test%.exe: $(call LINK_DEPS,%)
+Test%.exe : $(call LINK_DEPS,%)
 	@echo -e "----------------------" 
 	@echo "$@ -- Link --> $+"
 	@echo -e "----------------------"

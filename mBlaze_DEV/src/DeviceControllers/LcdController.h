@@ -11,6 +11,16 @@
 #include "../Utilities/Vector.h"
 #include "../Utilities/arraylist.h"
 #define DISPLAY_MATRIX_ROW  2
+#define DISPLAY_MATRIX_COL  16
+
+
+typedef enum DISPLAY_MODES
+        {
+          HEX,
+          DECIMAL,
+          CHAR
+        }DISPLAY_MODES;
+
 
 typedef struct LcdController {
 	XUartLite uartDeviceCtr;
@@ -18,7 +28,10 @@ typedef struct LcdController {
 	arraylist_t availRows;
 	char lcdSendBuffer[16];
 	u16* currentViewRows;
+	DISPLAY_MODES displayMode;
+	Vector byteVector;
 } LcdController;
+
 
 /**
  * Initializes a static LcdController struct. Assigns a uart controller
@@ -33,7 +46,14 @@ typedef struct LcdController {
 void lcd_construct(XUartLite* uartCtr, u32 deviceId);
 
 
+/**
+ * Getter method for LcdController struct.
+ *
+ * @return	A pointer to LcdController struct
+ */
 LcdController* lcd_getController();
+
+
 /**
  * Clears the LCD display area. Sets cursor to the beginning.
  */
@@ -68,11 +88,11 @@ u32 lcd_displayPrevious();
 
 
 /**
- * Sets the display buffer. It represents the processed data to be displayed.
+ * Sets the byteVector of LcdController. It represents the unprocessed data to be displayed.
  *
- * @param 	byteVector is the raw input to be displayed. It can have u8 numbers.
+ * @param 	bytes is the raw input to be displayed. It can have u8 numbers.
  */
-void lcd_setBuffer(arraylist_t* processedRows);
+void lcd_setByteVector(Vector* bytes);
 
 
 /**
@@ -91,10 +111,65 @@ void lcd_setBuffer(arraylist_t* processedRows);
 u32 lcd_displayRow(u16 rowIndex);
 
 /**
-* Displays current rows.
-*/
+ * Displays the rows specified at LcdController struct.
+ *
+ * @return		- XST_SUCCESS
+ * 				- XST_FAILURE
+
+
+ */
 u32 lcd_displayRows();
 
-void setViewToDefault();
+/**
+ * Sets the currentViewRows in LcdController struct to default. 
+ * Default rows are 0,1, ... , (DISPLAY_MATRIX_ROW-1)
+ *
+ * @return		void
+ */
+void lcd_setViewToDefault();
+
+
+
+/**
+ *	Calculates the displayable char arrays. Max length of each row is defined by DISPLAY_MATRIX_COL.
+ *	Each byte from input vector is transformed to a string representation and
+ *  inserted into the display matrix.
+ *
+ *	@param byteVector is the input of the method. Must consist u8 numbers as data. 
+ * 	
+ *	@return void
+ */
+void calculateDisplayMatrix(Vector* byteVector);
+
+/**
+ * Performs byte to string conversion. Decoding is performed
+ * according to the specifications defined in LcdController struct..
+ *
+ * @param	byte is a u8 number.
+ * @param	resultStr is the output of the method.
+ *
+ * @return 	void
+ *
+ * @note	Caller must initialize the LcdConfig beforehand.
+ * 			Caller also malloc resultStr before passing.
+ */			
+void lcd_byteToString(u8 byte, char* resultStr);
+
+
+
+/**
+ * Changes the representation of the data, recalculates display vector.
+ *
+ * @param 	dispMode is the mode of representation. It can be one of the
+ * values in DISPLAY_MODES enum.
+ *
+ * @return	- XST_SUCCESS
+ * 			- XST_INVALID_PARAM if input display mode is not valid.
+ * 			- XST_FAILURE if there is a error.
+ */
+void lcd_changeDisplayMode(int dispMode);
+
+
+void lcd_generateRows();
 
 #endif /* LCDCONTROLLER_H_ */
