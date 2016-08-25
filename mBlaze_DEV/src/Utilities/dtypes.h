@@ -129,17 +129,17 @@ typedef u_int64_t u_ptrint_t;
 #define NBITS 32
 typedef unsigned long uint_t;
 typedef long int_t;
-typedef int32_t offset_t;
-typedef u_int32_t index_t;
-typedef int32_t ptrint_t;
-typedef u_int32_t u_ptrint_t;
+//typedef Xint32 offset_t;
+//typedef u_int32_t index_t;
+//typedef int32_t ptrint_t;
+//typedef u_int32_t u_ptrint_t;
 #endif
 
-typedef u_int8_t  uint8_t;
-typedef u_int16_t uint16_t;
-typedef u_int32_t uint32_t;
-typedef u_int64_t uint64_t;
-typedef u_ptrint_t uptrint_t;
+//typedef u_int8_t  uint8_t;
+//typedef u_int16_t uint16_t;
+//typedef u_int32_t uint32_t;
+//typedef u_int64_t uint64_t;
+//typedef u_ptrint_t uptrint_t;
 
 #define LLT_ALIGN(x, sz) (((x) + (sz-1)) & (-sz))
 

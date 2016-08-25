@@ -56,18 +56,24 @@ int main()
 	/***************************************************************/
 	//UartLite
 	/***************************************************************/
+	xil_printf("Before Lcd Line\r\n");
 	XUartLite lcdUart;
 	Status = constructUartController(&lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	xil_printf("Lcd uart initialized\r\n");
+	lcd_construct(&lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	xil_printf("Lcd controller constructed\r\n");
 	assertStatus(Status,"LCD Uart initialization was unsuccesful.");
 	/***************************************************************/
 	//Bluetooth
 	/***************************************************************/
 	Status = bt_setUp(XPAR_UARTLITE_0_DEVICE_ID);
+	xil_printf("bt setup executed.\r\n");
 	checkStatus(Status);
 	/***************************************************************/
 	//Interrupt Controller.
 	/***************************************************************/
 	Status = initInterruptSystem();
+	xil_printf("Interrupt system initialized.\r\n");
 	connectInterrupts(bt_getPtr(),XPAR_INTC_0_UARTLITE_0_VEC_ID,(XInterruptHandler)XUartLite_InterruptHandler);
 	startIntrController();
 	enableIntrController();
@@ -77,10 +83,12 @@ int main()
 	//Setup Uart Intr Handlers
 	/***************************************************************/
 	bt_setUpIntr();
+	xil_printf("bt setup intr.\r\n");
 	bt_start(16);
+	xil_printf("bt started.\r\n");
 	/***************************************************************/
-
-	XUartLite_DisableInterrupt(&uartCtr_1);
+	//XUartLite_DisableInterrupt(&lcdUart);
+	xil_printf("uart_1 intr disabled.\r\n");
 	brc_init();
 	xil_printf("Entering Main Loop\r\n");
 	u32 oldSwitch = 0x0;
@@ -110,9 +118,14 @@ int main()
 						printVectorWithName(brc_getStack(),"Bram Stack : ");
 					}
 					if(switchInput==4){
+						//Read data from BRAM and forward it to LCD.
+
 						Vector* bramData = brc_getStack();
-						//implement vector to string array conversion here
-						lcd_setBuffer(bramData);
+						xil_printf("Bram get stack executed.\r\n");
+						lcd_setByteVector(bramData);
+						xil_printf("got the byte vector.\r\n");
+						lcd_generateRows();
+						xil_printf("generated rows.\r\n");
 						lcd_display();
 					}
 					if(switchInput==8){
@@ -122,40 +135,12 @@ int main()
 						lcd_displayNext();
 					}
 					if(switchInput==32){
-
-						sendString((u8*)"JESSIE",&uartCtr_1);
-
-						u8 lcdSendBuffer[16];
-						unsigned char escSeq[3] = {0x1B,'[', '\0'};
-
-						strcpy((char*)lcdSendBuffer,(char*)escSeq);
-						strcat((char*)lcdSendBuffer,"3e");
-						sendString(lcdSendBuffer,&uartCtr_1);
-						memset((char*)lcdSendBuffer, 0, 16);
-
-
-						strcpy((char*)lcdSendBuffer,(char*)escSeq);
-						strcat((char*)lcdSendBuffer,"j");
-						sendString(lcdSendBuffer,&uartCtr_1);
-
-						memset(lcdSendBuffer, 0, 16);
-						strcat((char*)lcdSendBuffer,(char*)escSeq);
-						strcat((char*)lcdSendBuffer,"0;1H");
-						sendString(lcdSendBuffer,&uartCtr_1);
-
-						memset(lcdSendBuffer, 0, 16);
-						strcat((char*)lcdSendBuffer,"Slaap lekker...");
-						sendString(lcdSendBuffer,&uartCtr_1);
-
-						memset(lcdSendBuffer, 0, 16);
-						strcat((char*)lcdSendBuffer,(char*)escSeq);
-						strcat((char*)lcdSendBuffer,"1;1H");
-						sendString(lcdSendBuffer,&uartCtr_1);
-
-						memset(lcdSendBuffer, 0, 16);
-						strcat((char*)lcdSendBuffer,"I love you !");
-						sendString(lcdSendBuffer,&uartCtr_1);
-
+						LcdController* lcdCtrPtr = lcd_getController();
+						xil_printf("got the byte vector.\r\n");
+						arraylist_push(&lcdCtrPtr->availRows,"Jessie !");
+						xil_printf("pushed something.\r\n");
+						lcd_displayRow(lcdCtrPtr->availRows.len-1);
+						xil_printf("display shit.\r\n");
 					}
 				}
 			}

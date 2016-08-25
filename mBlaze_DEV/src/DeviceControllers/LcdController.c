@@ -5,6 +5,7 @@
  *      Author: KaaN
  */
 #include "LcdController.h"
+#include "../Utilities/arraylist.h"
 
 
 
