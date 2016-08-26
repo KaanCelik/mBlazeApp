@@ -70,7 +70,8 @@ static void test_constructLcdCtr(){
 	for (i=0;i<DISPLAY_MATRIX_ROW;i++){
 		assert_int_equal(lcdCtrUnderTest->currentViewRows[i],i);
 	}
-
+	assert_memory_equal(&lcdCtrUnderTest->uartDeviceCtr , mockUartPtr, sizeof(XUartLite));
+	assert_int_equal(lcdCtrUnderTest->uartDeviceCtr.RegBaseAddress,123);
 	assert_int_equal((int)lcdCtrUnderTest->availRows.max,32);
 }
 
