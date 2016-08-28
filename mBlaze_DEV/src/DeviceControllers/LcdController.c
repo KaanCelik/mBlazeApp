@@ -50,7 +50,9 @@ void lcd_setViewToDefault(){
 }
 
 u32 lcd_displayRow(u16 rowIndex){
-
+	//TODO Implement lcd device cursor usage
+	//get rowCursor as an input parameter
+	//srtcat cursor command with the row to be displayed
 
 	u32 status = 0;
 
@@ -147,7 +149,7 @@ void lcd_generateRows(){
 	for(i=0;i<lcdCtr.byteVector.count;i++){
 		char* rowStr = malloc(sizeof(char)*DISPLAY_MATRIX_COL);
 
-		char* rowIndexStr=malloc(sizeof(char)*4);
+		char* rowIndexStr=malloc(sizeof(char)*9);
 		if(i>=100){
 			sprintf(rowIndexStr,"%d : ",i);
 		}else if (i>=10){
@@ -163,6 +165,8 @@ void lcd_generateRows(){
 		lcd_byteToString(*vector_getElement(&lcdCtr.byteVector,i),byteStr);
 		
 		strcat(rowStr,byteStr);
+		free(rowIndexStr);
+		free(byteStr);
 		arraylist_push(&lcdCtr.availRows,rowStr);
 	}
 

@@ -21,7 +21,6 @@
 /*** Devices *****************************************************/
 XGpio GpioOutput;
 XGpio GpioInput;
-XUartLite uartCtr_1;
 /*** Variables *****************************************************/
 
 /*** Methods ******************************************************/
@@ -30,7 +29,16 @@ Xuint32 initSwitch();
 u8 saveUserInput();
 /******************************************************************/
 
-
+//TODO Implement Error Handling
+/**
+ * !!!!!!!!!!!!!! IMPLEMENT THIS  !!!!!!!!!!!!!!!!!
+ * Seperate initialization code from main
+ * Return an error code from each of these functions.
+ * Error codes must be enumerated and stored in Errors.h header file
+ * Implement an error code parser for the error codes.
+ * Define a global variable holds the last error.
+ * Call the appropreate error handling functin or shut down gracefully.
+ */
 int main()
 {
 
@@ -49,22 +57,17 @@ int main()
 	/***************************************************************/
 	//Bram Controller
 	/***************************************************************/
-	//brc_selfTestBramController();
-
-	//brc_selfTestBramController('A');
-	//brc_selfTestBramController('B');
+	brc_init();
 	/***************************************************************/
-	//UartLite
+	//LcdController Setup
 	/***************************************************************/
-	xil_printf("Before Lcd Line\r\n");
-	XUartLite lcdUart;
-	Status = constructUartController(&lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
-	xil_printf("Lcd uart initialized\r\n");
-	lcd_construct(&lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
-	xil_printf("Lcd controller constructed\r\n");
+	XUartLite* lcdUart = malloc(sizeof(XUartLite));
+	Status = constructUartController(lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	lcd_construct(lcdUart,XPAR_AXI_UARTLITE_1_DEVICE_ID);
+	XUartLite_DisableInterrupt(lcdUart);
 	assertStatus(Status,"LCD Uart initialization was unsuccesful.");
 	/***************************************************************/
-	//Bluetooth
+	//Bluetooth setup
 	/***************************************************************/
 	Status = bt_setUp(XPAR_UARTLITE_0_DEVICE_ID);
 	xil_printf("bt setup executed.\r\n");
@@ -73,7 +76,6 @@ int main()
 	//Interrupt Controller.
 	/***************************************************************/
 	Status = initInterruptSystem();
-	xil_printf("Interrupt system initialized.\r\n");
 	connectInterrupts(bt_getPtr(),XPAR_INTC_0_UARTLITE_0_VEC_ID,(XInterruptHandler)XUartLite_InterruptHandler);
 	startIntrController();
 	enableIntrController();
@@ -83,14 +85,14 @@ int main()
 	//Setup Uart Intr Handlers
 	/***************************************************************/
 	bt_setUpIntr();
-	xil_printf("bt setup intr.\r\n");
+	//TODO Increase Interrupt handler sensitivity
 	bt_start(16);
-	xil_printf("bt started.\r\n");
 	/***************************************************************/
-	//XUartLite_DisableInterrupt(&lcdUart);
-	xil_printf("uart_1 intr disabled.\r\n");
-	brc_init();
-	xil_printf("Entering Main Loop\r\n");
+
+	/***************************************************************/
+	//Main loop
+	/***************************************************************/
+	xil_printf("Entering Main Loop !\r\n");
 	u32 oldSwitch = 0x0;
 	while (1)
 	{
@@ -122,14 +124,19 @@ int main()
 
 						Vector* bramData = brc_getStack();
 						xil_printf("Bram get stack executed.\r\n");
-						lcd_setByteVector(bramData);
-						xil_printf("got the byte vector.\r\n");
-						lcd_generateRows();
-						xil_printf("generated rows.\r\n");
-						lcd_display();
+						if(bramData->count){
+							lcd_setByteVector(bramData);
+							xil_printf("got the byte vector.\r\n");
+							lcd_generateRows();
+							xil_printf("generated rows.\r\n");
+							lcd_display();
+						} else {
+							xil_printf("No data in bram stack.\r\n");
+						}
 					}
+
 					if(switchInput==8){
-						lcd_displayPrevious();
+						lcd_clearDisplay();
 					}
 					if(switchInput==16){
 						lcd_displayNext();
@@ -168,6 +175,7 @@ Xuint32 initSwitch() {
 }
 
 u8 saveUserInput(){
+	//TODO Implement Basic commands and a parser for them
 	u8 success = FALSE;
 	u8 status;
 	if (bt_isDataPresent() == TRUE) {
