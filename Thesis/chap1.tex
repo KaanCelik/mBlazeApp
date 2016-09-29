@@ -1,11 +1,44 @@
 
-\chapter{Processor Design}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur quis nisl nibh. Vivamus viverra eleifend metus et tincidunt. Mauris quis ullamcorper ante. Nulla quis vehicula nisi. Aenean in vehicula turpis. Curabitur gravida, arcu a rutrum commodo, lectus leo vulputate dui, a cursus justo quam eget ipsum. Praesent blandit metus vitae lacus vehicula porttitor.
-\section{Overview}
-Pellentesque hendrerit leo tortor. Donec pretium eleifend mi. Vivamus dapibus eget massa vel ultrices. In hac habitasse platea dictumst. In nec risus sit amet lectus sagittis viverra at sit amet nulla. Cras sed massa auctor, efficitur mauris ac, elementum elit. Nulla facilisi. Nunc molestie pretium ligula, at pretium nunc laoreet at. Proin id auctor sem. Donec eu velit posuere, pharetra diam nec, auctor dui. Donec ac egestas enim. Nullam vel arcu vehicula, suscipit orci id, accumsan nunc. Maecenas accumsan, orci a venenatis fermentum, dui urna aliquam dolor, in placerat mauris est at sapien. Donec gravida malesuada turpis ac pharetra.
-\subsection{Processor Overview}
-Quisque finibus elit dui, egestas elementum mauris suscipit vitae. Proin et hendrerit tortor, id iaculis orci. Sed vehicula sed magna id sodales. Maecenas ultricies risus nec ornare dignissim. In vitae finibus orci. Nam vel aliquam urna. Sed iaculis dictum neque. Pellentesque a convallis lacus. Nullam auctor vel nulla a convallis. Ut nec suscipit arcu.
-\section{Processor Design}
-Donec suscipit est vel pretium interdum. Morbi malesuada risus sit amet neque pharetra sodales sit amet et lacus. Vestibulum vel euismod tellus. Nam in consequat nunc. Suspendisse potenti. Etiam commodo porta suscipit. Proin finibus sed enim eget ultrices. Mauris eu nunc enim. Aenean et felis id lorem viverra euismod. Aliquam vehicula sodales est sed iaculis. Morbi mattis vehicula massa sit amet congue.
+\chapter{Hardware Design}
 
-Nullam tempor, metus ut consectetur volutpat, diam arcu viverra ligula, fermentum porttitor dui ligula non nisi. Etiam dui risus, malesuada dapibus felis vitae, pharetra vulputate purus. Vivamus quis blandit ligula, tincidunt bibendum turpis. Sed ac est justo. Curabitur at magna a ligula porttitor gravida. Nullam euismod ipsum faucibus, luctus purus sit amet, accumsan est. Morbi nec tortor non velit gravida bibendum eget in ex. Cras tristique posuere lacus, a blandit ipsum pulvinar sed. Vivamus nec velit aliquet, rutrum diam ac, egestas massa. 
+\section{Objective}
+The aim of this project is to build a system that is capable of receiving data via Bluetooth, saving those data  and displaying them on a LCD.
+
+
+\section{Overview}
+
+The input interface of system is a Bluetooth module, with this module the system can communicate with the outside world. The Bluetooth module sends and receives serial data and is connected to processor via an UART module. This module is controlled by the processor. The processor saves the data on a BRAM block using a Bram Controller. In order to provide a user feedback a LCD is used. This LCD is connected to the processor via another UART module. In a typical use case scenario, data is received via Bluetooth, processed by the processor, saved and then displayed on LCD. 
+
+\includegraphics[scale=0.6]{images/Mblaze_Diagram_1.png}
+
+
+\section{Processor}
+As processing unit a MicroBlaze soft core processor implemented on the FPGA.
+\subsection{Microblaze™}
+MicroBlaze™ is a key element of Xilinx’s Embedded Product Portfolio. As a full-featured, FPGA optimized 32-bit Reduced Instruction Set Computer (RISC) soft processor, Microblaze meet requirements for diverse applications such as industrial, medical, automotive, consumer, and communication infrastructure markets among others. MicroBlaze is a highly configurable and easy to use processor and can be used across FPGAs and All Programmable (AP) SoC families. It is included free with Vivado® Design and System Edition and Vivado Webpack Edition. It is also available as part of legacy IDS embedded edition for older FPGA device families like Spartan®-6, Virtex®-6 etc.
+
+MicroBlaze is highly configurable IP core supporting 70+ configuration options. Some of the key configuration options are Instruction/Data Cache, Floating Point unit, Memory Management Unit etc. With highly flexible and configurable core, user can implement virtually any processor use case, from a very-small-footprint state machine or micro controller to a high-performance, compute-intensive microprocessor-based system running Linux. The IP can be configured to operate in either a three-stage pipeline mode (to optimize for size), or in a five-stage pipeline mode (to optimize for speed)—thus delivering faster DMIPs performance than any other FPGA-based soft processing solution.
+
+\subsection{Processor Design}
+During the design process two UART IP modules added to the design in order to utilize the Bluetooth module and LCD. A Bram block and a Bram Controller is added to design for the data storage. The MicroBlaze processor and the modules mentioned above are connected over the AXI bus.
+
+\section{Bluetooth Connection} 
+As a Bluetooth module, HC-06 is used. It has its own buffer which it can use to save and receive data. The TX and RX pins are connected to the UART module. Any received data over the Bluetooth comes to the FIFO receive register of the UART module. Similarly, any data to be send first written to FIFO send register of the UART module and then sent via the Bluetooth module. UART Controller is programmed and utilized by the software written on the processor. Interrupt mode of the Bluetooth controller is used for receiving data, on the other hand for sending data Polling mode is used.
+
+\section{Data Storage}
+Storing data in a memory unit outside the memory map of the processor is one of the key aspects of the project. This way the system can share data with other systems without corrupting the memory of the processor. In order to do this a Bram block and a Bram controller are used.
+
+The system accepts 8-bit data from user however Bram block has 32-bit registers. In order to utilize the memory more efficiently an algorithm is developed to write four 8-bit unsigned integers on a single register and keep the track of the memory addresses. This algorithm also provides the necessary information to read a specific data from a specific register.
+
+\subsection{Functional Description}
+At runtime processor receives data via its Bluetooth interface and keeps it on its own memory. After initial processing of the data it is saved on the Bram block by utilizing Bram Controller. Bram Controller has a vendor library which provides a vast number operations on the Bram block. With this library writing data on Bram becomes a simple task of writing data on a memory address provided by the Bram Controller.
+
+
+\section{Display}
+In order to provide a useful feedback to user a LCD module is used. It is connected to a the processor via UART interface. It allows user to see what data is saved on BRAM block.
+The module chosen for this project is PmodCLS. It supports the UART protocol and some vendor provided basic commands. 
+
+\section{Software}
+All of the software is written in C language using the tools provided by the vendor. Software is divided in subsystems corresponding to the hardware modules. 
+One of the biggest challenge was to make sure all the components work as intended in cooperation with each other. Therefore software needed to be designed with extra care and detail. 
+ 
