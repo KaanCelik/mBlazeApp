@@ -92,11 +92,11 @@ void printVector(Vector * v) {
 	}
 }
 void printVectorWithName(Vector * v, char* vName) {
-	//xil_printf("%s\r\n",vName);
+	xil_printf("%s\r\n",vName);
 	int i;
 
 	for (i = 0; i < vector_count(v); i++) {
-		//xil_printf("v[%d]: %c\n", i, *(vector_getElement(v, i)));
+		xil_printf("v[%d]: %d\n", i, *(vector_getElement(v, i)));
 	}
 }
 u8 vector_equals(Vector * v1, Vector * v2) {

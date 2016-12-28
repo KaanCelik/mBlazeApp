@@ -48,14 +48,20 @@ void lcd_setViewToDefault(){
 		lcdCtr.currentViewRows[i]=i;
 	}	
 }
+void lcd_moveCursor(int row, int col){
 
-u32 lcd_displayRow(u16 rowIndex){
-	//TODO Implement lcd device cursor usage
-	//get rowCursor as an input parameter
-	//srtcat cursor command with the row to be displayed
+	strcpy(lcdCtr.lcdSendBuffer,(char*)escSeq);
+	char* cursorSeq = malloc(sizeof(char)*10);
+	memset(cursorSeq,0,10);
+	sprintf(cursorSeq,"%d;%dH",row,col);
+	strcat(lcdCtr.lcdSendBuffer,cursorSeq);
+	sendString((u8*)lcdCtr.lcdSendBuffer,&lcdCtr.uartDeviceCtr);
+	free(cursorSeq);
+}
+u32 lcd_displayRow(u16 rowIndex, u16 posIndex){
 
 	u32 status = 0;
-
+	lcd_moveCursor(posIndex,0);
 	status = sendString((u8*) lcdCtr.availRows.items[rowIndex],&lcdCtr.uartDeviceCtr);
 	return status;
 
@@ -67,10 +73,12 @@ u32 lcd_displayRows()
 	u32 status;
     int i = 0;
     for (i = 0; i < DISPLAY_MATRIX_ROW; ++i) {
-		status = lcd_displayRow(lcdCtr.currentViewRows[i]);
+		status = lcd_displayRow(lcdCtr.currentViewRows[i],i);
 	}
     return status;
 }
+
+
 
 u32 lcd_display() {
 	lcd_setViewToDefault();
@@ -84,14 +92,14 @@ u32 lcd_display() {
 u32 lcd_displayNext(){
 	setViewToNext();
 	u32 status = 0;
-	status = lcd_displayRows(*lcdCtr.currentViewRows);
+	status = lcd_displayRows();
 	return status;
 }
 
 u32 lcd_displayPrevious(){
 	setViewToPrev();
 	u32 status;
-	status = lcd_displayRows(*lcdCtr.currentViewRows);
+	status = lcd_displayRows();
 	return status;
 }
 
@@ -101,6 +109,7 @@ void lcd_clearDisplay(){
 	strcat(lcdCtr.lcdSendBuffer,"j");
 	sendString((u8*)lcdCtr.lcdSendBuffer,&lcdCtr.uartDeviceCtr);
 }
+
 
 
 void lcd_byteToString(u8 byte, char* resultStr){
@@ -142,32 +151,61 @@ void lcd_changeDisplayMode(int dispMode){
 void lcd_setByteVector(Vector* bytes){
 	lcdCtr.byteVector = *bytes;
 }
+void  buildWord(char* outStr, int index){
+	char* titleStr = malloc(sizeof(char)*4);
+	memset(titleStr,0,4);
+	sprintf(titleStr, "%d:", index);
+	char* byteStr = malloc(sizeof(char)*5);
+	memset(byteStr,0,5);
+	lcd_byteToString(*vector_getElement(&lcdCtr.byteVector,index),byteStr);
+	if(index < 10){
+		strcat(outStr," ");
+	}
+	strcat(outStr,titleStr);
+
+	int i=0;
+	int len = strlen(byteStr);
+	if( len <= 5 ){
+		strcat(outStr,byteStr);
+		for (i=0;i <5-len; i++ ){
+			strcat(outStr," ");
+		}
+	} else {
+		strncpy(outStr,byteStr,5);
+	}
+	free(byteStr);
+	free(titleStr);
+}
 
 void lcd_generateRows(){
 
 	int i = 0;
-	for(i=0;i<lcdCtr.byteVector.count;i++){
+	for(i=0;i<lcdCtr.byteVector.count;i=i+2){
+
 		char* rowStr = malloc(sizeof(char)*DISPLAY_MATRIX_COL);
+		memset(rowStr,0,DISPLAY_MATRIX_COL);
 
-		char* rowIndexStr=malloc(sizeof(char)*9);
-		if(i>=100){
-			sprintf(rowIndexStr,"%d : ",i);
-		}else if (i>=10){
-			sprintf(rowIndexStr,"%d  : ",i);
-		}
-		else{
-			sprintf(rowIndexStr,"%d   : ",i);	
-		}
-				
-		strcpy(rowStr,rowIndexStr);
-		char* byteStr = malloc(sizeof(char)*5);
+		char* wordStr = malloc(sizeof(char)*9);
+		memset(wordStr,0,9);
+		buildWord(wordStr,i);
+		strcat(rowStr,wordStr);
 
-		lcd_byteToString(*vector_getElement(&lcdCtr.byteVector,i),byteStr);
-		
-		strcat(rowStr,byteStr);
-		free(rowIndexStr);
-		free(byteStr);
+		memset(wordStr,0,9);
+		buildWord(wordStr,i+1);
+		strcat(rowStr,wordStr);
+
+		free(wordStr);
+
 		arraylist_push(&lcdCtr.availRows,rowStr);
 	}
 
 }
+
+
+
+
+
+
+
+
+

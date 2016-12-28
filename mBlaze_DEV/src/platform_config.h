@@ -5,4 +5,10 @@
 #define CACHEABLE_REGION_MASK 0x80800000
 #endif
 
+#ifdef DEBUG
+#define DEBUG_MODE 1
+#else
+#define DEBUG_MODE 0
+#endif
+
 #endif

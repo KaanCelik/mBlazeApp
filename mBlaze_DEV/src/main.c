@@ -18,6 +18,7 @@
 #include "DeviceControllers/LcdController.h"
 #include "Bluetooth.h"
 
+
 /*** Devices *****************************************************/
 XGpio GpioOutput;
 XGpio GpioInput;
@@ -41,18 +42,21 @@ u8 saveUserInput();
  */
 int main()
 {
-
+	if(DEBUG_MODE){
+		xil_printf("DEBUG_MODE = ON\n");
+	}else{
+		xil_printf("DEBUG_MODE = OFF\n");
+	}
 	//Initialize basic setup
 	/***************************************************************/
 	int Status;
 	init_platform();
-	//xil_printf("%c[2J", 27);
 	/***************************************************************/
 	//Input Output Devices
 	/***************************************************************/
 	Status = initLed();
 	assertStatus(Status,"LED initialization was unsuccesful.");
-	Status =initSwitch();
+	Status = initSwitch();
 	assertStatus(Status,"8 bit Switch initialization was unsuccesful.");
 	/***************************************************************/
 	//Bram Controller
@@ -70,7 +74,7 @@ int main()
 	//Bluetooth setup
 	/***************************************************************/
 	Status = bt_setUp(XPAR_UARTLITE_0_DEVICE_ID);
-	xil_printf("bt setup executed.\r\n");
+	if(DEBUG_MODE){xil_printf("bt setup executed.\r\n");}
 	checkStatus(Status);
 	/***************************************************************/
 	//Interrupt Controller.
@@ -146,7 +150,7 @@ int main()
 						xil_printf("got the byte vector.\r\n");
 						arraylist_push(&lcdCtrPtr->availRows,"Jessie !");
 						xil_printf("pushed something.\r\n");
-						lcd_displayRow(lcdCtrPtr->availRows.len-1);
+						lcd_displayRow(lcdCtrPtr->availRows.len-1,1);
 						xil_printf("display shit.\r\n");
 					}
 				}

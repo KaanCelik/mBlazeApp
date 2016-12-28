@@ -28,7 +28,9 @@ u16 sendString(u8* data, XUartLite* uartPtr) {
 				break;
 			}
 	    }
-	printBuffer(SendBuffer,"Sending data");
+	if(DEBUG_MODE){
+		printBuffer(SendBuffer,"Sending data");
+	}
 	int size =  strlen((char*)data);
 	sentCount = XUartLite_Send(uartPtr, data, size);
 	while(XUartLite_IsSending(uartPtr)){

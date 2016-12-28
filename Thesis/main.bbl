@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{android-developer}
+Android api guide.
+
+\bibitem{android-studio}
+Android studio.
+
+\bibitem{mb-reference}
+Microblaze processor reference guide.
+
+\bibitem{xilinx-xps-edk}
+Xilinx design tools.
+
+\bibitem{eetimes-lattice}
+Max Maxfield.
+\newblock Lattice introduces ice40 ultraplus high-performance low-power fpgas.
+
+\bibitem{eetimes-fpga}
+Xilinx Yvonne~Lin.
+\newblock Using fpgas to solve challenges in industrial applications.
+
+\end{thebibliography}

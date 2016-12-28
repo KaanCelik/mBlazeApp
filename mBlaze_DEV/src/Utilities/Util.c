@@ -7,6 +7,7 @@
 #include "Util.h"
 
 void printBuffer(u8* buffer, char* exp){
+
 	unsigned char * sendData;
 	sendData = buffer;
 	xil_printf("%s : %s\r\n",exp, sendData);
@@ -16,6 +17,7 @@ void printBuffer(u8* buffer, char* exp){
 		i++;
 	}
 	if(buffer[i]=='\0'){xil_printf("\r\n");}
+
 }
 void printStatus(char* message, int status) {
 	xil_printf("%s%d\r\n",message, status);

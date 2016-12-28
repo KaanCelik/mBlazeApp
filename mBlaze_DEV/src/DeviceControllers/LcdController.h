@@ -104,11 +104,13 @@ void lcd_setByteVector(Vector* bytes);
  *
  * @param 	rowIndex is the position of the selected row within availRows. Specifies which exact row
  * 			must be displayed.
+ * @param 	Specifies the display position on screen.
+ * 			Starts from 0 which represents first row
  *
  * @return	- XST_SUCCESS
  * 			- XST_FAILURE
  */
-u32 lcd_displayRow(u16 rowIndex);
+u32 lcd_displayRow(u16 rowIndex, u16 posIndex);
 
 /**
  * Displays the rows specified at LcdController struct.

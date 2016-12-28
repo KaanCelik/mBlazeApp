@@ -2,22 +2,23 @@
 \chapter{Hardware Design}
 
 \section{Objective}
-The aim of this project is to build a system that is capable of receiving data via Bluetooth, saving those data  and displaying them on a LCD.
+Design goal is to build a system that is capable of receiving data via Bluetooth and save the data to an external memory. As a separate functionality, reading data from external memory and displaying it with an LCD module is required.
 
 
 \section{Overview}
 
-The input interface of system is a Bluetooth module, with this module the system can communicate with the outside world. The Bluetooth module sends and receives serial data and is connected to processor via an UART module. This module is controlled by the processor. The processor saves the data on a BRAM block using a Bram Controller. In order to provide a user feedback a LCD is used. This LCD is connected to the processor via another UART module. In a typical use case scenario, data is received via Bluetooth, processed by the processor, saved and then displayed on LCD. 
-
-\includegraphics[scale=0.6]{images/Mblaze_Diagram_1.png}
+The input interface of system is a Bluetooth module, with this module the system can communicate with the outside world. The Bluetooth module sends and receives serial data and is connected to processor via an UART module. UART module is controlled by the processor. The processor saves the data on an external BRAM block using a Bram Controller. In order to provide a user feedback a LCD is used. This LCD is connected to the processor via another UART module. In a typical use case scenario, data is received via Bluetooth, processed by the processor, saved and then displayed on LCD. 
 
 
-\section{Processor}
-As processing unit a MicroBlaze soft core processor implemented on the FPGA.
-\subsection{Microblaze™}
-MicroBlaze™ is a key element of Xilinx’s Embedded Product Portfolio. As a full-featured, FPGA optimized 32-bit Reduced Instruction Set Computer (RISC) soft processor, Microblaze meet requirements for diverse applications such as industrial, medical, automotive, consumer, and communication infrastructure markets among others. MicroBlaze is a highly configurable and easy to use processor and can be used across FPGAs and All Programmable (AP) SoC families. It is included free with Vivado® Design and System Edition and Vivado Webpack Edition. It is also available as part of legacy IDS embedded edition for older FPGA device families like Spartan®-6, Virtex®-6 etc.
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{images/Mblaze_Diagram_1.png}
+	\caption{Component Diagram}
+\end{figure}
 
-MicroBlaze is highly configurable IP core supporting 70+ configuration options. Some of the key configuration options are Instruction/Data Cache, Floating Point unit, Memory Management Unit etc. With highly flexible and configurable core, user can implement virtually any processor use case, from a very-small-footprint state machine or micro controller to a high-performance, compute-intensive microprocessor-based system running Linux. The IP can be configured to operate in either a three-stage pipeline mode (to optimize for size), or in a five-stage pipeline mode (to optimize for speed)—thus delivering faster DMIPs performance than any other FPGA-based soft processing solution.
+\section{MicroBlaze}
+As processing unit a MicroBlaze soft core processor is implemented on the FPGA in order to utilise other IP blocks and manage data transfer via Bluetooth. 
+By using Xilinx Platform Studio tool MicroBlaze processor can be customized to fit design requirements. Any number of IP blocks can also be added as long as capacity of FPGA permits. Moreover interconnections between these components via memory bus can be specified. Since MicroBlaze only has one interrupt input, an interrupt controller needs to be included into design in order to support multiple inputs. These interrupts and their priorities are configured using the visual interface.
 
 \subsection{Processor Design}
 During the design process two UART IP modules added to the design in order to utilize the Bluetooth module and LCD. A Bram block and a Bram Controller is added to design for the data storage. The MicroBlaze processor and the modules mentioned above are connected over the AXI bus.
