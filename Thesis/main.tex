@@ -24,7 +24,6 @@
 %% If you want blank pages before new chapters to be labelled ``This
 %% Page Intentionally Left Blank'', use the ``leftblank'' option, as
 %% above. 
-
 \documentclass[12pt,twoside]{mitthesis}
 \usepackage{lgrind}
 %% These have been added at the request of the MIT Libraries, because
@@ -40,7 +39,6 @@
 \usepackage{graphicx}
 
 \begin{document}
-
 %\include{cover}
 % Some departments (e.g. 5) require an additional signature page.  See
 % signature.tex for more information and uncomment the following line if
@@ -52,7 +50,7 @@
 %\listoftables
 \input{intro}
 \input{preliminaries}
-\input{chap1}
+\include{chap1}
 
 
 %\appendix
@@ -61,4 +59,3 @@
 \bibliographystyle{plain}
 \bibliography{biblio}
 \end{document}
-

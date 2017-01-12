@@ -6,19 +6,23 @@
 \contentsline {section}{\numberline {2.1}Microblaze}{7}
 \contentsline {subsection}{\numberline {2.1.1}Architecture}{7}
 \contentsline {subsection}{\numberline {2.1.2}Signal Interface}{9}
-\contentsline {subsection}{\numberline {2.1.3}Xilinx EDK}{10}
+\contentsline {subsection}{\numberline {2.1.3}Xilinx EDK}{9}
 \contentsline {section}{\numberline {2.2}Pmod CLS}{10}
 \contentsline {section}{\numberline {2.3}HC-06 Bluetooth Module}{11}
-\contentsline {section}{\numberline {2.4}Digilent Nexys 3 FPGA Board}{12}
-\contentsline {section}{\numberline {2.5}Software}{14}
-\contentsline {section}{\numberline {2.6}Android}{14}
-\contentsline {chapter}{\numberline {3}Hardware Design}{17}
-\contentsline {section}{\numberline {3.1}Objective}{17}
-\contentsline {section}{\numberline {3.2}Overview}{17}
-\contentsline {section}{\numberline {3.3}MicroBlaze}{18}
-\contentsline {subsection}{\numberline {3.3.1}Processor Design}{18}
-\contentsline {section}{\numberline {3.4}Bluetooth Connection}{19}
-\contentsline {section}{\numberline {3.5}Data Storage}{19}
-\contentsline {subsection}{\numberline {3.5.1}Functional Description}{19}
-\contentsline {section}{\numberline {3.6}Display}{20}
-\contentsline {section}{\numberline {3.7}Software}{20}
+\contentsline {section}{\numberline {2.4}Digilent Nexys 3 FPGA Board}{11}
+\contentsline {section}{\numberline {2.5}Software}{12}
+\contentsline {section}{\numberline {2.6}Android}{13}
+\contentsline {chapter}{\numberline {3}Hardware Design}{15}
+\contentsline {section}{\numberline {3.1}Objective}{15}
+\contentsline {section}{\numberline {3.2}Overview}{15}
+\contentsline {section}{\numberline {3.3}MicroBlaze}{16}
+\contentsline {subsection}{\numberline {3.3.1}Processor Design}{16}
+\contentsline {subsection}{\numberline {3.3.2}IP Blocks}{16}
+\contentsline {subsubsection}{AXI Uart Lite}{16}
+\contentsline {subsubsection}{Block Ram (BRAM)}{17}
+\contentsline {subsubsection}{AXI BRAM Controller}{17}
+\contentsline {section}{\numberline {3.4}Bluetooth Connection}{17}
+\contentsline {section}{\numberline {3.5}Data Storage}{17}
+\contentsline {section}{\numberline {3.6}Display}{18}
+\contentsline {section}{\numberline {3.7}Software}{18}
+\contentsline {section}{\numberline {3.8}Functional Description}{18}

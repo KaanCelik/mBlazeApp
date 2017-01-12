@@ -18,10 +18,23 @@ The input interface of system is a Bluetooth module, with this module the system
 
 \section{MicroBlaze}
 As processing unit a MicroBlaze soft core processor is implemented on the FPGA in order to utilise other IP blocks and manage data transfer via Bluetooth. 
-By using Xilinx Platform Studio tool MicroBlaze processor can be customized to fit design requirements. Any number of IP blocks can also be added as long as capacity of FPGA permits. Moreover interconnections between these components via memory bus can be specified. Since MicroBlaze only has one interrupt input, an interrupt controller needs to be included into design in order to support multiple inputs. These interrupts and their priorities are configured using the visual interface.
+By using Xilinx Platform Studio tool MicroBlaze processor can be customized to fit design requirements. Any number of IP blocks available from IP library can also be added as long as capacity of FPGA permits. Moreover interconnections between these components via memory bus can be specified. Since MicroBlaze only has one interrupt input, an interrupt controller needs to be included into design in order to support multiple inputs. These interrupts and their priorities are configured using the visual interface.
 
 \subsection{Processor Design}
 During the design process two UART IP modules added to the design in order to utilize the Bluetooth module and LCD. A Bram block and a Bram Controller is added to design for the data storage. The MicroBlaze processor and the modules mentioned above are connected over the AXI bus.
+\subsection{IP Blocks}
+
+\subsubsection{AXI Uart Lite}
+UART functionalities are implemented using AXI UART LITE IP block \cite{axi-uart}. Two identical blocks are added to design; one is used for bluetooth communication and other used to control LCD module. It provides 16-character transmit and receive FIFOs, configurable baud rates and configurable parity bit options. For both uart blocks, baud rate is set to 9600 and parity option selected as none.
+
+Xilinx EDK provides low level functions for this IP block as software library. Application specific driver software is written using these libraries and incorporated into software design.   
+\subsubsection{Block Ram (BRAM)}
+As external memory component, a BRAM block is added to design \cite{bram-block}. It provides dual port operation which serves best to design needs. So that, it is possible to write data to this memory by processor and later same data can be accessed by other modules on the same FPGA.
+   
+\subsubsection{AXI BRAM Controller}
+In order to utilize BRAM block with MicroBlaze processor a BRAM controller is needed. For this purpose an AXI BRAM Controller IP core is added to design \cite{bram-ctr}. It is connected to processor with AXI bus and provides the necessary functionalities needed by processor.
+
+On software part a driver library is developed to meet application specific needs using the vendor software provided by Xilinx EDK.
 
 \section{Bluetooth Connection} 
 As a Bluetooth module, HC-06 is used. It has its own buffer which it can use to save and receive data. The TX and RX pins are connected to the UART module. Any received data over the Bluetooth comes to the FIFO receive register of the UART module. Similarly, any data to be send first written to FIFO send register of the UART module and then sent via the Bluetooth module. UART Controller is programmed and utilized by the software written on the processor. Interrupt mode of the Bluetooth controller is used for receiving data, on the other hand for sending data Polling mode is used.
@@ -31,10 +44,6 @@ Storing data in a memory unit outside the memory map of the processor is one of 
 
 The system accepts 8-bit data from user however Bram block has 32-bit registers. In order to utilize the memory more efficiently an algorithm is developed to write four 8-bit unsigned integers on a single register and keep the track of the memory addresses. This algorithm also provides the necessary information to read a specific data from a specific register.
 
-\subsection{Functional Description}
-At runtime processor receives data via its Bluetooth interface and keeps it on its own memory. After initial processing of the data it is saved on the Bram block by utilizing Bram Controller. Bram Controller has a vendor library which provides a vast number operations on the Bram block. With this library writing data on Bram becomes a simple task of writing data on a memory address provided by the Bram Controller.
-
-
 \section{Display}
 In order to provide a useful feedback to user a LCD module is used. It is connected to a the processor via UART interface. It allows user to see what data is saved on BRAM block.
 The module chosen for this project is PmodCLS. It supports the UART protocol and some vendor provided basic commands. 
@@ -43,3 +52,9 @@ The module chosen for this project is PmodCLS. It supports the UART protocol and
 All of the software is written in C language using the tools provided by the vendor. Software is divided in subsystems corresponding to the hardware modules. 
 One of the biggest challenge was to make sure all the components work as intended in cooperation with each other. Therefore software needed to be designed with extra care and detail. 
  
+ \section{Functional Description}
+ REWORK 
+ 
+ At runtime processor receives data via its Bluetooth interface and keeps it on its own memory. After initial processing of the data it is saved on the Bram block by utilizing Bram Controller. Bram Controller has a vendor library which provides a vast number operations on the Bram block. With this library writing data on Bram becomes a simple task of writing data on a memory address provided by the Bram Controller. 
+ 
+ REWORK 
